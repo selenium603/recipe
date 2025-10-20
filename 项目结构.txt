@@ -1,0 +1,16 @@
+src/
+├── components/
+│   ├── GlobalNavigation.vue      # 全局导航栏
+│   ├── GlobalFooter.vue         # 全局底部
+│   ├── FoodCard.vue            # 美食卡片组件
+│   ├── IngredientSelector.vue  # 食材选择器
+│   └── CuisineSelector.vue     # 菜系选择器
+├── views/
+│   └── Home.vue                # 主页面
+├── types/
+│   └── index.ts               # 类型定义
+├── data/
+│   └── recipes.json           # 本地菜谱数据集
+├── stores/
+│   └── useRecipeStore.ts     # 状态管理
+└── main.ts                    # 应用入口

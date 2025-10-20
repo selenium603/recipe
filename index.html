@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>美食决策大师</title>
+  <link rel="icon" href="/favicon.ico" />
+  <style>
+    .electric-border {
+      --electric-border-color: #0af;
+      --electric-light-color: oklch(from var(--electric-border-color) l c h);
+      --eb-border-width: 3px;
+      position: relative;
+      border-radius: 12px;
+      overflow: visible;
+      isolation: isolate;
+      cursor: pointer;
+      animation: electric-flicker 1.5s infinite alternate;
+    }
+
+    .eb-content {
+      position: relative;
+      z-index: 1;
+      padding: 0 12px;
+      display: inline-block;
+      user-select: none;
+      animation: content-flicker 1.5s infinite alternate;
+    }
+
+    .electric-border::before,
+    .electric-border::after {
+      content: '';
+      position: absolute;
+      pointer-events: none;
+      border-radius: inherit;
+      inset: 0;
+      box-sizing: border-box;
+    }
+
+    .electric-border::before {
+      border: var(--eb-border-width) solid var(--electric-border-color);
+      filter: drop-shadow(0 0 6px var(--electric-border-color));
+      animation: border-glow 1.5s infinite alternate;
+      z-index: 2;
+    }
+
+    .electric-border::after {
+      border: var(--eb-border-width) solid var(--electric-light-color);
+      filter: blur(6px);
+      opacity: 0.7;
+      animation: border-flicker 1.5s infinite alternate;
+      z-index: 1;
+    }
+
+    @keyframes electric-flicker {
+      0%, 100% {
+        box-shadow: 0 0 5px var(--electric-border-color), 0 0 10px var(--electric-border-color);
+      }
+      50% {
+        box-shadow: 0 0 15px var(--electric-border-color), 0 0 25px var(--electric-border-color);
+      }
+    }
+
+    @keyframes content-flicker {
+      0%, 100% {
+        filter: brightness(1) drop-shadow(0 0 2px #0af);
+        transform: translate(0);
+      }
+      50% {
+        filter: brightness(1.4) drop-shadow(0 0 6px #0af);
+        transform: translate(1px, 1px);
+      }
+    }
+
+    @keyframes border-glow {
+      0%, 100% {
+        opacity: 0.7;
+        filter: drop-shadow(0 0 8px var(--electric-border-color));
+      }
+      50% {
+        opacity: 1;
+        filter: drop-shadow(0 0 20px var(--electric-border-color));
+      }
+    }
+
+    @keyframes border-flicker {
+      0%, 100% {
+        opacity: 0.6;
+        filter: blur(5px);
+      }
+      50% {
+        opacity: 0.9;
+        filter: blur(8px) drop-shadow(0 0 10px var(--electric-light-color));
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <!-- Electric border SVG filter -->
+  <svg width="0" height="0" style="position: absolute">
+    <filter id="turbulent-displace">
+      <feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="2" seed="3">
+        <animate attributeName="baseFrequency" values="0.012;0.02;0.012" dur="1s" repeatCount="indefinite"/>
+      </feTurbulence>
+      <feDisplacementMap in="SourceGraphic" scale="10" xChannelSelector="R" yChannelSelector="G">
+        <animate attributeName="scale" values="10;16;10" dur="1s" repeatCount="indefinite"/>
+      </feDisplacementMap>
+    </filter>
+  </svg>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

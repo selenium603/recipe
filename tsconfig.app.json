@@ -1,0 +1,33 @@
+{
+  "extends": "@vue/tsconfig/tsconfig.dom.json",
+  "include": [
+    "env.d.ts", 
+    "src/**/*.ts",       // ← 添加 .ts 文件支持
+    "src/**/*.d.ts",     // ← 添加类型定义文件
+    "src/**/*.vue",
+    "src/data/**/*.json" // ← 关键：添加JSON文件路径
+  ],
+  "exclude": [
+    "src/**/__tests__/*",
+    "node_modules",      // ← 添加排除node_modules
+    "dist"               // ← 添加排除dist目录
+  ],
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    // ↓↓↓ 添加以下配置 ↓↓↓
+    "resolveJsonModule": true,     // 关键：启用JSON模块解析
+    "esModuleInterop": true,       // 改善模块互操作性
+    "baseUrl": ".",                // 设置基础路径
+    "target": "ESNext",            // 编译目标
+    "module": "ESNext",            // 模块系统
+    "moduleResolution": "Node",    // 模块解析策略
+    "strict": true,                // 严格模式
+    "jsx": "preserve",             // JSX处理
+    "sourceMap": true,             // 生成source map
+    "lib": ["ESNext", "DOM"]       // 包含的库定义
+    // ↑↑↑ 添加以上配置 ↑↑↑
+  }
+}
