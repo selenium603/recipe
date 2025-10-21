@@ -1,9 +1,9 @@
 <template>
   <ClickSpark :spark-color="'#ff6b6b'" :spark-size="12" :spark-radius="20" :spark-count="12" :duration="600" easing="ease-out" :extra-scale="1.2">
-    <div class="min-h-screen bg-gradient-to-br from-orange-50 to-amber-100 px-2 md:px-6 pt-16 md:pt-20">
+    <div class="min-h-screen bg-gradient-to-br from-orange-50 to-amber-100 px-2 md:px-6 pt-16 md:pt-20 flex flex-col">
       <GlobalNavigation />
 
-    <div class="max-w-7xl mx-auto">
+    <div class="max-w-7xl mx-auto flex-1 w-full pb-8">
       <!-- Logo 区域 -->
       <div class="text-center mb-3">
         <div
