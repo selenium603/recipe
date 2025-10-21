@@ -5,7 +5,7 @@
 
     <div class="max-w-7xl mx-auto flex-1 w-full pb-8">
       <!-- Logo 区域 -->
-      <div class="text-center mb-3">
+      <div class="text-center mb-1">
         <div
           class="w-20 h-20 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center mx-auto shadow-lg border-4 border-white"
         >
