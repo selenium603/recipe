@@ -1,11 +1,11 @@
 <template>
   <ClickSpark :spark-color="'#ff6b6b'" :spark-size="12" :spark-radius="20" :spark-count="12" :duration="600" easing="ease-out" :extra-scale="1.2">
-    <div class="min-h-screen bg-gradient-to-br from-orange-50 to-amber-100 px-2 md:p-6">
+    <div class="min-h-screen bg-gradient-to-br from-orange-50 to-amber-100 px-2 md:p-6 pt-24 md:pt-28">
       <GlobalNavigation />
 
     <div class="max-w-7xl mx-auto">
       <!-- 主标题区域 -->
-      <div class="text-center mb-8">
+      <div class="text-center mb-4">
         <div
           class="w-20 h-20 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg border-4 border-white"
         >
@@ -15,98 +15,93 @@
         <p class="text-gray-600 max-w-md mx-auto">让美食抽卡帮你终结选择困难症！</p>
       </div>
 
-      <!-- 步骤1: 选择食材 -->
-      <section class="mb-6">
-        <div
-          class="bg-orange-400 text-white px-4 py-2 rounded-t-lg border-2 border-[#0A0910] border-b-0 inline-block"
-        >
-          <span class="font-bold">1. 选择食材</span>
-        </div>
-        <div
-          class="bg-white border-2 border-[#0A0910] rounded-lg rounded-tl-none p-4 md:p-6"
-        >
-          <IngredientSelector v-model:selectedIngredients="selectedIngredients" />
-          <div
-            class="px-3 py-2 bg-gray-50 border-t border-gray-200 text-xs text-gray-500 flex justify-between items-center mt-4"
-          >
-            <span>点击食材快速添加到列表</span>
-            <span class="font-medium">已选择 {{ selectedIngredients.length }}/10</span>
+      <!-- 堆叠滚动卡片区域 -->
+      <ScrollStack 
+        :use-window-scroll="true" 
+        :item-distance="80"
+        :item-stack-distance="50"
+        stack-position="20%"
+        :base-scale="0.94"
+      >
+        <!-- 步骤1: 选择食材 -->
+        <ScrollStackItem item-className="bg-gradient-to-br from-orange-100 to-orange-50">
+          <div class="bg-orange-400 text-white px-4 py-2 rounded-t-lg border-2 border-[#0A0910] border-b-0 inline-block -mx-6 -mt-6 md:-mx-12 md:-mt-12 mb-4">
+            <span class="font-bold">1. 选择食材</span>
           </div>
-        </div>
-      </section>
-
-      <!-- 步骤2: 选择菜系 -->
-      <section class="mb-6">
-        <div
-          class="bg-green-400 text-white px-4 py-2 rounded-t-lg border-2 border-[#00910] border-b-0 inline-block"
-        >
-          <span class="font-bold">2. 选择菜系</span>
-        </div>
-        <div
-          class="bg-white border-2 border-[#0A0910] rounded-lg rounded-tl-none p-4 md:p-6"
-        >
-          <CuisineSelector v-model:selectedCuisines="selectedCuisines" />
-        </div>
-      </section>
-
-      <!-- 步骤3: 生成推荐 -->
-      <section class="mb-6">
-        <div
-          class="bg-blue-400 text-white px-4 py-2 rounded-t-lg border-2 border-[#0A0910] border-b-0 inline-block"
-        >
-          <span class="font-bold">3. 生成推荐</span>
-        </div>
-        <div
-          class="bg-white border-2 border-[#0A0910] rounded-lg rounded-tl-none p-4 md:p-6"
-        >
-          <!-- 健康替换建议 -->
-          <div v-if="healthySuggestions.length" class="mb-4 bg-blue-50 border border-blue-200 text-blue-800 rounded p-3 text-sm">
-            <div class="font-semibold mb-2">更健康的替换建议</div>
-            <div class="flex flex-wrap gap-2">
-              <button
-                v-for="s in healthySuggestions"
-                :key="s.from + '->' + s.to"
-                @click="applyHealthySuggestion(s.from, s.to)"
-                class="px-3 py-1 rounded-full bg-white border border-blue-300 hover:bg-blue-100"
-                :title="`将 ${s.from} 替换为 ${s.to}`"
-              >
-                {{ s.from }} → {{ s.to }}
-              </button>
+          <div class="bg-white border-2 border-[#0A0910] rounded-lg p-4 md:p-6">
+            <IngredientSelector v-model:selectedIngredients="selectedIngredients" />
+            <div class="px-3 py-2 bg-gray-50 border-t border-gray-200 text-xs text-gray-500 flex justify-between items-center mt-4">
+              <span>点击食材快速添加到列表</span>
+              <span class="font-medium">已选择 {{ selectedIngredients.length }}/10</span>
             </div>
           </div>
+        </ScrollStackItem>
 
-          <div class="flex justify-center">
-            <button
-              @click="generateRecommendation"
-              :disabled="!canDraw"
-              class="relative electric-border px-7 py-3 font-semibold text-white rounded-lg disabled:opacity-50"
-              style="--electric-border-color:#22d3ee; background: radial-gradient(60% 100% at 50% 0%, #1f2937 0%, #111827 60%, #0b1220 100%); box-shadow: 0 0 32px rgba(34,211,238,.25) inset, 0 0 12px rgba(34,211,238,.35);"
-            >
-              <span class="relative z-[1] flex items-center gap-2">
-                <template v-if="isGenerating">
-                  <span>抽卡中...</span>
-                </template>
-                <template v-else>
-                  <span class="text-xl">🎲</span>
-                  <span>开始抽卡</span>
-                </template>
-              </span>
-              <span class="eb-stroke"></span>
-              <span class="eb-glow-1"></span>
-              <span class="eb-glow-2"></span>
-              <span class="eb-background-glow"></span>
-            </button>
+        <!-- 步骤2: 选择菜系 -->
+        <ScrollStackItem item-className="bg-gradient-to-br from-green-100 to-green-50">
+          <div class="bg-green-400 text-white px-4 py-2 rounded-t-lg border-2 border-[#0A0910] border-b-0 inline-block -mx-6 -mt-6 md:-mx-12 md:-mt-12 mb-4">
+            <span class="font-bold">2. 选择菜系</span>
           </div>
-
-          <div class="text-sm text-center text-gray-600 mt-4">
-            <p>✨ 将从 {{ filteredRecipes.length }} 道菜品中随机推荐</p>
-            <p class="text-xs mt-1">选择困难症指数: {{ difficultyIndex }}%</p>
+          <div class="bg-white border-2 border-[#0A0910] rounded-lg p-4 md:p-6">
+            <CuisineSelector v-model:selectedCuisines="selectedCuisines" />
           </div>
-        </div>
-      </section>
+        </ScrollStackItem>
 
-      <!-- 推荐结果展示 -->
-      <section v-if="drawnCards.length" class="mb-8 animate-fade-in-up">
+        <!-- 步骤3: 生成推荐 -->
+        <ScrollStackItem item-className="bg-gradient-to-br from-blue-100 to-blue-50">
+          <div class="bg-blue-400 text-white px-4 py-2 rounded-t-lg border-2 border-[#0A0910] border-b-0 inline-block -mx-6 -mt-6 md:-mx-12 md:-mt-12 mb-4">
+            <span class="font-bold">3. 生成推荐</span>
+          </div>
+          <div class="bg-white border-2 border-[#0A0910] rounded-lg p-4 md:p-6">
+            <!-- 健康替换建议 -->
+            <div v-if="healthySuggestions.length" class="mb-4 bg-blue-50 border border-blue-200 text-blue-800 rounded p-3 text-sm">
+              <div class="font-semibold mb-2">更健康的替换建议</div>
+              <div class="flex flex-wrap gap-2">
+                <button
+                  v-for="s in healthySuggestions"
+                  :key="s.from + '->' + s.to"
+                  @click="applyHealthySuggestion(s.from, s.to)"
+                  class="px-3 py-1 rounded-full bg-white border border-blue-300 hover:bg-blue-100"
+                  :title="`将 ${s.from} 替换为 ${s.to}`"
+                >
+                  {{ s.from }} → {{ s.to }}
+                </button>
+              </div>
+            </div>
+
+            <div class="flex justify-center">
+              <button
+                @click="generateRecommendation"
+                :disabled="!canDraw"
+                class="relative electric-border px-7 py-3 font-semibold text-white rounded-lg disabled:opacity-50"
+                style="--electric-border-color:#22d3ee; background: radial-gradient(60% 100% at 50% 0%, #1f2937 0%, #111827 60%, #0b1220 100%); box-shadow: 0 0 32px rgba(34,211,238,.25) inset, 0 0 12px rgba(34,211,238,.35);"
+              >
+                <span class="relative z-[1] flex items-center gap-2">
+                  <template v-if="isGenerating">
+                    <span>抽卡中...</span>
+                  </template>
+                  <template v-else>
+                    <span class="text-xl">🎲</span>
+                    <span>开始抽卡</span>
+                  </template>
+                </span>
+                <span class="eb-stroke"></span>
+                <span class="eb-glow-1"></span>
+                <span class="eb-glow-2"></span>
+                <span class="eb-background-glow"></span>
+              </button>
+            </div>
+
+            <div class="text-sm text-center text-gray-600 mt-4">
+              <p>✨ 将从 {{ filteredRecipes.length }} 道菜品中随机推荐</p>
+              <p class="text-xs mt-1">选择困难症指数: {{ difficultyIndex }}%</p>
+            </div>
+          </div>
+        </ScrollStackItem>
+      </ScrollStack>
+
+      <!-- 推荐结果展示 - 置于底部 -->
+      <section v-if="drawnCards.length" class="mb-8 mt-8 animate-fade-in-up relative z-10" ref="resultsSection">
         <div
           class="bg-orange-400 text-white px-4 py-2 rounded-t-lg border-2 border-[#0A0910] border-b-0 inline-block"
         >
@@ -136,7 +131,7 @@
           </div>
 
           <div class="text-center mt-8">
-            <h3 class="text-2xl font-bold text-dark-800 mb-2">已抽到 {{ drawnCards.length }} 张</h3>
+            <h3 class="text-2xl font-bold text-dark-800 mb-2">已抽到 {{ history.length }} 张</h3>
 
             <div class="flex justify-center gap-4">
             <div
@@ -224,6 +219,8 @@ import IngredientSelector from '@/components/IngredientSelector.vue'
 import CuisineSelector from '@/components/CuisineSelector.vue'
 import FoodCard from '@/components/FoodCard.vue'
 import ClickSpark from '@/components/ClickSpark.vue'
+import ScrollStack from '@/components/ScrollStack.vue'
+import ScrollStackItem from '@/components/ScrollStackItem.vue'
 
 const router = useRouter()
 const recipeStore = useRecipeStore()
@@ -239,6 +236,7 @@ const history = ref<Array<{ name: string; cuisine: string; emoji: string }>>([])
 const resultsContainerRef = ref<HTMLDivElement | null>(null)
 const gridRef = ref<HTMLDivElement | null>(null)
 const resultsMinHeight = ref<number>(0)
+const resultsSection = ref<HTMLElement | null>(null)
 
 const filteredRecipes = computed(() => {
   return recipeStore.recipes.filter(recipe => {
@@ -275,6 +273,18 @@ async function generateRecommendation() {
   const card = { id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}` , recipe, revealed: false, settled: false, showingPicker: false }
   drawnCards.value.push(card)
 
+  // 等待 DOM 更新后滚动到推荐结果区域的中间位置
+  await new Promise(resolve => setTimeout(resolve, 100))
+  
+  if (resultsSection.value) {
+    const sectionTop = resultsSection.value.offsetTop
+    const sectionHeight = resultsSection.value.offsetHeight
+    const windowHeight = window.innerHeight
+    // 计算让推荐结果区域居中的滚动位置
+    const scrollToPosition = sectionTop - (windowHeight / 2) + (sectionHeight / 2)
+    window.scrollTo({ top: scrollToPosition, behavior: 'smooth' })
+  }
+
   // 轻微延迟触发展示翻转动画
   await new Promise(resolve => setTimeout(resolve, 50))
   card.revealed = true
@@ -284,14 +294,30 @@ async function generateRecommendation() {
     nextTickResize()
   }, 650)
 
-  // 记录历史，最多7条
-  history.value.unshift({
+  // 记录历史，最多7条，避免重复
+  const newHistoryItem = {
     name: recipe.name,
     cuisine: recipe.cuisine,
     emoji: recipe.emoji || '🍽️',
-  })
-  // 立即截断到7条
+  }
+  
+  // 检查是否已存在相同的菜谱
+  const existingIndex = history.value.findIndex(
+    item => item.name === newHistoryItem.name && item.cuisine === newHistoryItem.cuisine
+  )
+  
+  if (existingIndex !== -1) {
+    // 如果存在，移除旧的，添加到开头
+    history.value.splice(existingIndex, 1)
+  }
+  
+  // 添加到开头
+  history.value.unshift(newHistoryItem)
+  
+  // 截断到7条
   history.value = history.value.slice(0, 7)
+  
+  // 保存到localStorage
   localStorage.setItem('foodHistory', JSON.stringify(history.value))
 
   isGenerating.value = false
@@ -333,6 +359,14 @@ function clearHistory() {
   // 触发自定义事件通知其他页面
   window.dispatchEvent(new CustomEvent('foodHistoryCleared'))
   
+  // 强制触发storage事件，确保其他页面能收到更新
+  window.dispatchEvent(new StorageEvent('storage', {
+    key: 'foodHistory',
+    newValue: null,
+    oldValue: localStorage.getItem('foodHistory'),
+    storageArea: localStorage
+  }))
+  
   // 确保清除操作完成
   console.log('历史记录已清除，当前历史记录数量:', history.value.length)
 }
@@ -368,7 +402,24 @@ function formatTime(minutes: number) {
 // 让"家常菜"和"小吃"不受菜系筛选限制
 function relaxedCuisineMatch(recipe: Recipe) {
   if (recipe.cuisine === '家常菜' || recipe.cuisine === '小吃') return true
-  return selectedCuisines.value.length === 0 || selectedCuisines.value.includes(recipe.cuisine)
+  if (selectedCuisines.value.length === 0) return true
+  
+  // ID到中文名的映射
+  const cuisineIdToName: Record<string, string> = {
+    'chuan': '川菜',
+    'yue': '粤菜',
+    'su': '苏菜',
+    'lu': '鲁菜',
+    'zhe': '浙菜',
+    'min': '闽菜',
+    'xiang': '湘菜',
+    'hui': '徽菜',
+    'hu': '沪菜'
+  }
+  
+  // 将选中的ID转换为中文名
+  const selectedCuisineNames = selectedCuisines.value.map(id => cuisineIdToName[id]).filter(Boolean)
+  return selectedCuisineNames.includes(recipe.cuisine)
 }
 
 // 健康替换建议

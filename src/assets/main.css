@@ -1,1 +1,50 @@
 @import "tailwindcss";
+
+/* 平滑滚动全局样式 */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+/* 卡片堆叠效果优化 */
+.scroll-stack-card {
+  /* 强制硬件加速 */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* 性能优化 */
+  contain: layout style paint;
+  content-visibility: auto;
+  /* 平滑transform变化 */
+  will-change: transform;
+  /* 确保在GPU层 */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+/* 禁用触摸动作以避免冲突 */
+body {
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 优化滚动性能 */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

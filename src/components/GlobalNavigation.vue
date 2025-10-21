@@ -1,40 +1,41 @@
 <template>
-  <nav class="bg-orange-400 text-white p-4 shadow-md mb-8">
-    <div class="max-w-7xl mx-auto flex items-center justify-between">
-      <h1 class="text-xl font-bold select-none">🍱 美食决策大师</h1>
-      <div class="flex items-center gap-3">
-        <RouterLink 
-          to="/" 
-          class="px-4 py-2 rounded-lg transition-colors font-medium"
-          :class="$route.path === '/' ? 'bg-white text-orange-500' : 'bg-white/20 text-white hover:bg-white/30'"
-        >
-          首页
-        </RouterLink>
-        <RouterLink 
-          to="/search" 
-          class="px-4 py-2 rounded-lg transition-colors font-medium"
-          :class="$route.path === '/search' ? 'bg-white text-orange-500' : 'bg-white/20 text-white hover:bg-white/30'"
-        >
-          🔍 AI搜索
-        </RouterLink>
-        <RouterLink 
-          to="/collections" 
-          class="px-4 py-2 rounded-lg transition-colors font-medium"
-          :class="$route.path === '/collections' ? 'bg-white text-orange-500' : 'bg-white/20 text-white hover:bg-white/30'"
-        >
-          收藏夹
-        </RouterLink>
-      </div>
-    </div>
-  </nav>
+  <CardNav
+    :items="navItems"
+    base-color="#fff"
+    menu-color="#ff6b35"
+    button-bg-color="#ff6b35"
+    button-text-color="#fff"
+    ease="power3.out"
+  />
 </template>
 
 <script setup lang="ts">
-// 简单静态，功能可结合vue-router拓展
+import CardNav from './CardNav.vue'
+
+const navItems = [
+  {
+    label: "主页",
+    bgColor: "#ff6b35",
+    textColor: "#fff",
+    route: "/",
+    links: []
+  },
+  {
+    label: "AI 搜索", 
+    bgColor: "#f7931e",
+    textColor: "#fff",
+    route: "/search",
+    links: []
+  },
+  {
+    label: "收藏夹",
+    bgColor: "#fdc830", 
+    textColor: "#fff",
+    route: "/collections",
+    links: []
+  }
+]
 </script>
 
 <style scoped>
-nav {
-  user-select: none;
-}
 </style>
