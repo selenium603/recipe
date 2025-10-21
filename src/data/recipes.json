@@ -143,7 +143,7 @@
     "emoji": "🥩",
     "ingredients": ["番茄", "牛肉", "米"],
     "cookingTime": 90,
-    "difficulty": "普通",
+    "difficulty": "简单",
     "flavor": "番茄浓香",
     "description": "牛腩与番茄慢焖更入味，汤浓肉烂。",
     "steps": [
@@ -231,7 +231,7 @@
     "emoji": "🍚",
     "ingredients": ["番茄", "牛肉", "米"],
     "cookingTime": 60,
-    "difficulty": "普通",
+    "difficulty": "简单",
     "flavor": "番茄鲜香",
     "description": "番茄与牛肉同焖，米饭吸满汤汁；部分做法需先炒香再入锅。",
     "steps": [

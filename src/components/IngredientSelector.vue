@@ -1,18 +1,23 @@
 <!-- IngredientSelector.vue -->
 <template>
   <div>
-    <h4 class="text-sm font-bold text-dark-800 mb-3 flex items-center gap-1">
-      <span>🥬</span>
-      <span>选择食材</span>
-    </h4>
-
     <!-- 可展开/收起的选择面板 -->
     <details class="mb-4 group" :open="panelOpen" @toggle="onDetailsToggle">
       <summary
         class="cursor-pointer select-none px-4 py-2 border-2 border-[#0A0910] rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-between"
       >
         <span class="font-medium">食材列表</span>
-        <span>{{ panelOpen ? '－' : '＋' }}</span>
+        <div class="flex items-center gap-2">
+          <button
+            v-if="selectedIngredients.length > 0"
+            @click.prevent="clearAllIngredients"
+            class="text-xs px-2 py-0.5 rounded bg-red-100 text-red-600 hover:bg-red-200 transition-colors font-medium border border-red-300"
+            title="清空所有已选食材"
+          >
+            清空
+          </button>
+          <span>{{ panelOpen ? '－' : '＋' }}</span>
+        </div>
       </summary>
 
       <div class="mt-3 space-y-3">
@@ -116,7 +121,7 @@ const panelOpen = ref(false)
 // 基础清单：包含用户要求新增的食材（去重）
 const baseIngredients = Array.from(new Set([
   '包菜','午餐肉','土豆','方便面','木耳','洋葱','牛肉', '猪肉',
-  '番茄','白菜','白萝卜','米','肉','胡萝卜','腊肠','花菜','芹菜',
+  '番茄','白菜','白萝卜','米','胡萝卜','腊肠','花菜','芹菜',
   '茄子','莴笋','菌菇','虾','虾仁','西葫芦','豆腐','青椒','面包','面食',
   '香肠','鸡肉','鸡蛋','鸭蛋','鹅蛋','黄瓜'
 ]))
@@ -127,7 +132,7 @@ const vegetablesSet = new Set([
   '茄子','莴笋','菌菇','西葫芦','青椒','黄瓜'
 ])
 const meatSet = new Set([
-  '牛肉','猪肉','肉','腊肠','香肠','午餐肉','鸡肉','虾','虾仁'
+  '牛肉','猪肉','腊肠','香肠','午餐肉','鸡肉','虾','虾仁'
 ])
 const eggsDairySet = new Set([
   '鸡蛋','鸭蛋','鹅蛋','牛奶','奶酪'
@@ -181,6 +186,10 @@ const addCustomIngredient = () => {
     emit('update:selectedIngredients', updated)
     newIngredient.value = ''
   }
+}
+
+const clearAllIngredients = () => {
+  emit('update:selectedIngredients', [])
 }
 
 function onDetailsToggle(event: Event) {

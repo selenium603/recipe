@@ -1,18 +1,16 @@
 <template>
   <ClickSpark :spark-color="'#ff6b6b'" :spark-size="12" :spark-radius="20" :spark-count="12" :duration="600" easing="ease-out" :extra-scale="1.2">
-    <div class="min-h-screen bg-gradient-to-br from-orange-50 to-amber-100 px-2 md:px-6 pt-20 md:pt-24">
+    <div class="min-h-screen bg-gradient-to-br from-orange-50 to-amber-100 px-2 md:px-6 pt-16 md:pt-20">
       <GlobalNavigation />
 
     <div class="max-w-7xl mx-auto">
-      <!-- 主标题区域 -->
-      <div class="text-center mb-4">
+      <!-- Logo 区域 -->
+      <div class="text-center mb-3">
         <div
-          class="w-20 h-20 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg border-4 border-white"
+          class="w-20 h-20 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center mx-auto shadow-lg border-4 border-white"
         >
           <span class="text-white text-3xl">🍽️</span>
         </div>
-        <h1 class="text-4xl md:text-5xl font-bold text-dark-800 mb-2">今天吃什么？</h1>
-        <p class="text-gray-600 max-w-md mx-auto">让美食抽卡帮你终结选择困难症！</p>
       </div>
 
       <!-- 堆叠滚动卡片区域 -->
@@ -70,26 +68,30 @@
             </div>
 
             <div class="flex justify-center">
-              <button
-                @click="generateRecommendation"
-                :disabled="!canDraw"
-                class="relative electric-border px-7 py-3 font-semibold text-white rounded-lg disabled:opacity-50"
-                style="--electric-border-color:#22d3ee; background: radial-gradient(60% 100% at 50% 0%, #1f2937 0%, #111827 60%, #0b1220 100%); box-shadow: 0 0 32px rgba(34,211,238,.25) inset, 0 0 12px rgba(34,211,238,.35);"
+              <ElectricBorder
+                color="#7df9ff"
+                :speed="1"
+                :chaos="0.5"
+                :thickness="4"
+                :style="{ borderRadius: '12px' }"
               >
-                <span class="relative z-[1] flex items-center gap-2">
-                  <template v-if="isGenerating">
-                    <span>抽卡中...</span>
-                  </template>
-                  <template v-else>
-                    <span class="text-xl">🎲</span>
-                    <span>开始抽卡</span>
-                  </template>
-                </span>
-                <span class="eb-stroke"></span>
-                <span class="eb-glow-1"></span>
-                <span class="eb-glow-2"></span>
-                <span class="eb-background-glow"></span>
-              </button>
+                <button
+                  @click="generateRecommendation"
+                  :disabled="!canDraw"
+                  class="relative px-8 py-4 font-semibold text-white rounded-xl disabled:opacity-50 transition-all duration-200 hover:scale-105"
+                  style="background: radial-gradient(60% 100% at 50% 0%, #1f2937 0%, #111827 60%, #0b1220 100%); box-shadow: 0 0 32px rgba(125,249,255,.25) inset, 0 0 12px rgba(125,249,255,.35);"
+                >
+                  <span class="relative z-[1] flex items-center gap-2">
+                    <template v-if="isGenerating">
+                      <span>抽卡中...</span>
+                    </template>
+                    <template v-else>
+                      <span class="text-xl">🎲</span>
+                      <span>开始抽卡</span>
+                    </template>
+                  </span>
+                </button>
+              </ElectricBorder>
             </div>
 
             <div class="text-sm text-center text-gray-600 mt-4">
@@ -221,6 +223,7 @@ import FoodCard from '@/components/FoodCard.vue'
 import ClickSpark from '@/components/ClickSpark.vue'
 import ScrollStack from '@/components/ScrollStack.vue'
 import ScrollStackItem from '@/components/ScrollStackItem.vue'
+import ElectricBorder from '@/components/ElectricBorder.vue'
 
 const router = useRouter()
 const recipeStore = useRecipeStore()

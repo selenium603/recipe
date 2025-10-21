@@ -1,6 +1,6 @@
 <template>
   <div 
-    class="card-nav-container fixed left-1/2 -translate-x-1/2 w-[90%] max-w-7xl z-[99] top-[1.2em] md:top-[2em]"
+    class="card-nav-container fixed left-1/2 -translate-x-1/2 w-[90%] max-w-7xl z-[99] top-[0.5em] md:top-[0.8em]"
   >
     <nav
       ref="navRef"
@@ -30,7 +30,7 @@
 
         <!-- Logo -->
         <div class="logo-container flex items-center md:absolute md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 order-1 md:order-none">
-          <h1 class="text-lg font-bold select-none">🍱 美食决策大师</h1>
+          <h1 class="text-lg font-bold select-none">🍱 今天吃什么？</h1>
         </div>
       </div>
 

@@ -1,16 +1,14 @@
 <template>
   <ClickSpark :spark-color="'#ff6b6b'" :spark-size="12" :spark-radius="20" :spark-count="12" :duration="600" easing="ease-out" :extra-scale="1.2">
-    <div class="min-h-screen bg-gradient-to-br from-orange-50 to-amber-100 px-2 md:px-6 pt-20 md:pt-24">
+    <div class="min-h-screen bg-gradient-to-br from-orange-50 to-amber-100 px-2 md:px-6 pt-16 md:pt-20">
       <GlobalNavigation />
 
       <div class="max-w-7xl mx-auto">
-        <!-- 页面标题 -->
-        <div class="text-center mb-8">
-          <div class="w-20 h-20 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg border-4 border-white">
+        <!-- Logo 区域 -->
+        <div class="text-center mb-6">
+          <div class="w-20 h-20 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center mx-auto shadow-lg border-4 border-white">
             <span class="text-white text-3xl">📁</span>
           </div>
-          <h1 class="text-4xl md:text-5xl font-bold text-dark-800 mb-2">收藏夹</h1>
-          <p class="text-gray-600 max-w-md mx-auto">管理你的美食收藏，创建专属菜谱集合</p>
         </div>
 
         <!-- 操作行 -->
@@ -36,16 +34,16 @@
         <!-- 收藏夹列表 -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div v-for="col in collections" :key="col.id" class="bg-white border-2 border-[#0A0910] rounded-lg p-3">
-            <div class="flex items-center justify-between mb-2">
-              <input v-model="col.name" class="font-semibold flex-1 mr-2 border-b focus:outline-none" />
-              <div class="flex items-center gap-2">
+            <div class="flex items-center justify-between mb-2 gap-2">
+              <input v-model="col.name" class="font-semibold flex-1 mr-2 border-b focus:outline-none min-w-0" />
+              <div class="flex items-center gap-2 flex-shrink-0">
                 <button 
-                  :class="['text-xs px-2 py-1 rounded border', activeCandidateId === col.id ? 'bg-orange-500 text-white' : 'bg-gray-100']" 
+                  :class="['text-xs px-2 py-1 rounded border whitespace-nowrap', activeCandidateId === col.id ? 'bg-orange-500 text-white' : 'bg-gray-100']" 
                   @click="toggleCandidate(col.id)"
                 >
                   {{ activeCandidateId === col.id ? '取消候选集' : '设为抽卡候选集' }}
                 </button>
-                <button class="text-xs px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600" @click="removeCollection(col.id)">删除</button>
+                <button class="text-xs px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 whitespace-nowrap" @click="removeCollection(col.id)">删除</button>
               </div>
             </div>
             <div class="text-xs text-gray-500 mb-2">

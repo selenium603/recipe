@@ -1,7 +1,7 @@
 <template>
   <footer class="bg-gray-200 text-gray-600 p-4 text-center text-sm select-none mt-16">
     <div class="max-w-7xl mx-auto">
-      ©  美食决策大师. 保留所有权利.
+      ©  今天吃什么. 保留所有权利.
     </div>
   </footer>
 </template>

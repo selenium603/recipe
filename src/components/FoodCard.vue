@@ -90,10 +90,8 @@ const props = defineProps<{
 const emit = defineEmits(['show-picker', 'hide-picker'])
 
 const difficultyText = computed(() => {
-  const time = props.recipe.cookingTime
-  if (time <= 30) return '简单'
-  if (time <= 60) return '中等'
-  return '困难'
+  // 直接使用 recipe 中定义的 difficulty 字段
+  return props.recipe.difficulty
 })
 
 const formatTime = (minutes: number) => {

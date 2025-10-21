@@ -1,16 +1,14 @@
 <template>
   <ClickSpark :spark-color="'#ff6b6b'" :spark-size="12" :spark-radius="20" :spark-count="12" :duration="600" easing="ease-out" :extra-scale="1.2">
-    <div class="min-h-screen bg-gradient-to-br from-orange-50 to-amber-100 px-2 md:px-6 pt-20 md:pt-24">
+    <div class="min-h-screen bg-gradient-to-br from-orange-50 to-amber-100 px-2 md:px-6 pt-16 md:pt-20">
       <GlobalNavigation />
 
       <div class="max-w-7xl mx-auto">
-        <!-- 页面标题 -->
-        <div class="text-center mb-8">
-          <div class="w-20 h-20 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg border-4 border-white">
+        <!-- Logo 区域 -->
+        <div class="text-center mb-6">
+          <div class="w-20 h-20 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center mx-auto shadow-lg border-4 border-white">
             <span class="text-white text-3xl">🔍</span>
           </div>
-          <h1 class="text-4xl md:text-5xl font-bold text-dark-800 mb-2">AI智能搜索</h1>
-          <p class="text-gray-600 max-w-md mx-auto">输入关键词，让AI为你推荐最合适的美食！</p>
         </div>
 
         <!-- 搜索区域 -->
@@ -100,7 +98,7 @@
 
         <!-- 默认状态 -->
         <div v-if="!hasSearched && !isSearching" class="text-center py-16">
-          <div class="text-6xl mb-4">🍽️</div>
+          <div class="text-6xl mb-2">🍽️</div>
           <h3 class="text-xl font-semibold text-gray-700 mb-2">开始你的美食探索之旅</h3>
           <p class="text-gray-500 mb-6">输入关键词，发现更多美味菜谱</p>
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto">

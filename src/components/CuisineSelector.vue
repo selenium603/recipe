@@ -1,11 +1,6 @@
 <!-- CuisineSelector.vue -->
 <template>
   <div>
-    <h4 class="text-sm font-bold text-dark-800 mb-3 flex items-center gap-1">
-      <span>🏮</span>
-      <span>选择菜系（可选）</span>
-    </h4>
-    
     <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
       <button
         v-for="cuisine in cuisines"
