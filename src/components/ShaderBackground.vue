@@ -164,11 +164,13 @@ const createShader = (gl: WebGLRenderingContext, type: number, source: string): 
 const initWebGL = () => {
   if (!canvasRef.value) return false
   
-  gl = canvasRef.value.getContext('webgl') || canvasRef.value.getContext('experimental-webgl')
-  if (!gl) {
+  const context = canvasRef.value.getContext('webgl') || canvasRef.value.getContext('experimental-webgl')
+  if (!context || !(context instanceof WebGLRenderingContext)) {
     console.error('WebGL not supported')
     return false
   }
+  
+  gl = context as WebGLRenderingContext
   
   // 创建着色器
   const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource)

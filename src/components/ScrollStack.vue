@@ -37,7 +37,7 @@ const props = withDefaults(defineProps<Props>(), {
   scaleDuration: 0.5,
   rotationAmount: 0,
   blurAmount: 0,
-  useWindowScroll: false
+  useWindowScroll: false, // 默认关闭平滑滚动以节省资源
 })
 
 const emit = defineEmits(['stackComplete'])
@@ -185,7 +185,6 @@ const updateCardTransforms = () => {
 }
 
 const handleScroll = () => {
-  // 直接更新，不使用 RAF 节流，让 Lenis 的 RAF 控制节奏
   updateCardTransforms()
 }
 
@@ -300,6 +299,7 @@ onMounted(() => {
   })
 
   setupLenis()
+  
   updateCardTransforms()
 })
 
@@ -313,6 +313,6 @@ onUnmounted(() => {
   stackCompletedRef.value = false
   cardsRef.value = []
   lastTransformsRef.value.clear()
-})
+})    
 </script>
 

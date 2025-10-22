@@ -64,8 +64,8 @@ const trail = ref<TrailItem[]>([])
 const lastMoveTime = ref(Date.now())
 const idCounter = ref(0)
 
-const getRandomEmoji = () => {
-  return props.emojis[Math.floor(Math.random() * props.emojis.length)]
+const getRandomEmoji = (): string => {
+  return props.emojis[Math.floor(Math.random() * props.emojis.length)] || '🍽️'
 }
 
 const handleMouseMove = (e: MouseEvent) => {
@@ -90,6 +90,8 @@ const handleMouseMove = (e: MouseEvent) => {
     })
   } else {
     const last = newTrail[newTrail.length - 1]
+    if (!last) return
+    
     const dx = mouseX - last.x
     const dy = mouseY - last.y
     const distance = Math.sqrt(dx * dx + dy * dy)
