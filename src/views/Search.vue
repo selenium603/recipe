@@ -1,6 +1,16 @@
 <template>
   <ClickSpark :spark-color="'#ff6b6b'" :spark-size="12" :spark-radius="20" :spark-count="12" :duration="600" easing="ease-out" :extra-scale="1.2">
-    <div class="min-h-screen bg-gradient-to-br from-orange-50 to-amber-100 px-2 md:px-6 pt-16 md:pt-20 flex flex-col">
+    <div class="min-h-screen px-2 md:px-6 pt-16 md:pt-20 flex flex-col relative">
+      <ShaderBackground />
+      <EmojiCursor 
+        :emojis="['🍲', '🥘', '🍛', '🍜', '🍕', '🍔', '🍱', '🍣']"
+        :spacing="200"
+        :maxPoints="8"
+        :randomFloat="true"
+        :followMouseDirection="false"
+        :exitDuration="0.2"
+        :removalInterval="15"
+      />
       <GlobalNavigation />
 
       <div class="max-w-7xl mx-auto flex-1 w-full pb-8">
@@ -16,7 +26,6 @@
           <div class="flex gap-2 mb-4">
             <input
               v-model="searchQuery"
-              @input="onSearchInput"
               @keyup.enter="performSearch"
               placeholder="输入菜名、食材或口味，如：麻辣、简单、下饭..."
               class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 text-lg"
@@ -88,11 +97,18 @@
           </div>
         </div>
         
-        <!-- 加载状态 -->
-        <div v-if="isSearching" class="text-center py-16">
-          <div class="inline-flex items-center gap-3">
-            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-            <span class="text-gray-600 text-lg">AI正在为你搜索美食...</span>
+        <!-- 加载状态 - 骨架屏 -->
+        <div v-if="isSearching">
+          <div class="text-center mb-6">
+            <div class="inline-flex items-center gap-3 bg-white/80 backdrop-blur-sm px-6 py-3 rounded-full border-2 border-orange-200 shadow-sm">
+              <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-orange-500"></div>
+              <span class="text-gray-700 font-medium">AI正在为你搜索美食...</span>
+            </div>
+          </div>
+          
+          <!-- 骨架屏卡片 -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <SkeletonCard v-for="i in 4" :key="i" />
           </div>
         </div>
 
@@ -165,6 +181,9 @@ import GlobalNavigation from '@/components/GlobalNavigation.vue'
 import GlobalFooter from '@/components/GlobalFooter.vue'
 import FoodCard from '@/components/FoodCard.vue'
 import ClickSpark from '@/components/ClickSpark.vue'
+import SkeletonCard from '@/components/SkeletonCard.vue'
+import ShaderBackground from '@/components/ShaderBackground.vue'
+import EmojiCursor from '@/components/EmojiCursor.vue'
 
 const recipeStore = useRecipeStore()
 const searchQuery = ref('')
@@ -179,16 +198,7 @@ const searchSuggestions = ref([
   '麻辣', '酸甜', '清淡', '汤类', '面食', '电饭煲', '15分钟'
 ])
 
-// 防抖搜索
-let searchTimeout: number
-const onSearchInput = () => {
-  clearTimeout(searchTimeout)
-  searchTimeout = setTimeout(() => {
-    if (searchQuery.value.trim()) {
-      performSearch()
-    }
-  }, 500)
-}
+// 移除自动搜索功能，只在按Enter或点击按钮时搜索
 
 const selectSuggestion = (suggestion: string) => {
   searchQuery.value = suggestion
@@ -198,16 +208,46 @@ const selectSuggestion = (suggestion: string) => {
 const performSearch = async () => {
   if (!searchQuery.value.trim()) return
   
+  // 清空之前的搜索结果
+  searchResults.value = []
+  
   isSearching.value = true
   hasSearched.value = true
   
+  // 记录开始时间
+  const startTime = Date.now()
+  
   try {
-    // 调用AI搜索
+    // 调用AI搜索（失败时会自动降级到本地搜索）
     const results = await recipeStore.searchRecipes(searchQuery.value)
+    
+    // 确保至少显示2秒加载动画
+    const elapsed = Date.now() - startTime
+    const remainingTime = Math.max(0, 2000 - elapsed)
+    
+    if (remainingTime > 0) {
+      await new Promise(resolve => setTimeout(resolve, remainingTime))
+    }
+    
     searchResults.value = results
+    
+    if (results.length === 0) {
+      console.warn('⚠️ 未返回任何结果')
+    } else {
+      console.log(`✅ 成功返回 ${results.length} 个菜谱`)
+    }
   } catch (error) {
-    console.error('AI搜索失败:', error)
-    // 降级到本地搜索
+    console.error('❌ 搜索出错:', error)
+    
+    // 确保至少显示2秒加载动画
+    const elapsed = Date.now() - startTime
+    const remainingTime = Math.max(0, 2000 - elapsed)
+    
+    if (remainingTime > 0) {
+      await new Promise(resolve => setTimeout(resolve, remainingTime))
+    }
+    
+    // 使用本地搜索作为后备
     searchResults.value = localSearch(searchQuery.value)
   } finally {
     isSearching.value = false

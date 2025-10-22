@@ -12,7 +12,7 @@ node_modules
 dist
 dist-ssr
 coverage
-*.local
+# *.local  # 已注释，允许.env.local被提交
 
 /cypress/videos/
 /cypress/screenshots/

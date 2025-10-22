@@ -18,21 +18,24 @@ const navItems = [
     bgColor: "#ff6b35",
     textColor: "#fff",
     route: "/",
-    links: []
+    links: [],
+    flex: 4.5
   },
   {
     label: "AI 搜索", 
     bgColor: "#f7931e",
     textColor: "#fff",
     route: "/search",
-    links: []
+    links: [],
+    flex: 4.5
   },
   {
     label: "收藏夹",
     bgColor: "#fdc830", 
     textColor: "#fff",
     route: "/collections",
-    links: []
+    links: [],
+    flex: 1
   }
 ]
 </script>

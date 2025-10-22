@@ -30,7 +30,7 @@
 
         <!-- Logo -->
         <div class="logo-container flex items-center md:absolute md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 order-1 md:order-none">
-          <h1 class="text-lg font-bold select-none">🍱 今天吃什么？</h1>
+          <h1 class="text-xl font-bold select-none">🍱 今天吃什么？</h1>
         </div>
       </div>
 
@@ -43,8 +43,8 @@
           v-for="(item, idx) in items"
           :key="`${item.label}-${idx}`"
           :ref="el => setCardRef(idx, el)"
-          class="nav-card select-none relative flex items-center justify-center px-4 py-3 rounded-lg min-w-0 flex-[1_1_auto] h-[50px] cursor-pointer transition-all duration-200 ease-out hover:opacity-90 hover:scale-[1.02]"
-          :style="{ backgroundColor: item.bgColor, color: item.textColor }"
+          class="nav-card select-none relative flex items-center justify-center px-4 py-3 rounded-lg min-w-0 h-[50px] cursor-pointer transition-all duration-200 ease-out hover:opacity-90 hover:scale-[1.02]"
+          :style="{ backgroundColor: item.bgColor, color: item.textColor, flex: item.flex ? `${item.flex} 1 auto` : '1 1 auto' }"
           @click="navigateTo(item.route)"
         >
           <div class="nav-card-label font-medium text-base whitespace-nowrap">
@@ -71,6 +71,7 @@ interface NavItem {
   textColor: string
   route: string
   links: NavLink[]
+  flex?: number
 }
 
 interface Props {

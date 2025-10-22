@@ -1,23 +1,21 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Home from '@/views/Home.vue'
-import Collections from '@/views/Collections.vue'
-import Search from '@/views/Search.vue'
 
+// 路由懒加载 - 按需加载页面组件，减少初始bundle大小
 const routes = [
   {
     path: '/',
     name: 'Home',
-    component: Home
+    component: () => import('@/views/Home.vue')
   },
   {
     path: '/collections',
     name: 'Collections',
-    component: Collections
+    component: () => import('@/views/Collections.vue')
   },
   {
     path: '/search',
     name: 'Search',
-    component: Search
+    component: () => import('@/views/Search.vue')
   }
 ]
 

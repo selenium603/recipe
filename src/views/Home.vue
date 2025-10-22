@@ -1,6 +1,16 @@
 <template>
   <ClickSpark :spark-color="'#ff6b6b'" :spark-size="12" :spark-radius="20" :spark-count="12" :duration="600" easing="ease-out" :extra-scale="1.2">
-    <div class="min-h-screen bg-gradient-to-br from-orange-50 to-amber-100 px-2 md:px-6 pt-16 md:pt-20 flex flex-col">
+    <div class="min-h-screen px-2 md:px-6 pt-16 md:pt-20 flex flex-col relative">
+      <ShaderBackground />
+      <EmojiCursor 
+        :emojis="['🍲', '🥘', '🍛', '🍜', '🍕', '🍔', '🍱', '🍣']"
+        :spacing="200"
+        :maxPoints="8"
+        :randomFloat="true"
+        :followMouseDirection="false"
+        :exitDuration="0.2"
+        :removalInterval="15"
+      />
       <GlobalNavigation />
 
     <div class="max-w-7xl mx-auto flex-1 w-full pb-8">
@@ -115,7 +125,8 @@
           ref="resultsContainerRef"
         >
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" ref="gridRef">
-            <div v-for="card in drawnCards" :key="card.id" class="relative" :class="{ 'z-50': card.showingPicker }">
+            <!-- v-memo优化：只在卡片状态改变时重渲染 -->
+            <div v-for="card in drawnCards" :key="card.id" v-memo="[card.revealed, card.settled, card.showingPicker]" class="relative" :class="{ 'z-50': card.showingPicker }">
               <div v-if="!card.settled" class="card" :class="{ 'is-flipped': card.revealed }" @click="openRecipe(card.recipe)">
                 <div class="card-face front">
                   <div class="w-full h-full bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center shadow-lg">
@@ -133,7 +144,7 @@
           </div>
 
           <div class="text-center mt-8">
-            <h3 class="text-2xl font-bold text-dark-800 mb-2">已抽到 {{ history.length }} 张</h3>
+            <h3 class="text-2xl font-bold text-dark-800 mb-2">已抽到 {{ drawnCards.length }} 张</h3>
 
             <div class="flex justify-center gap-4">
             <div
@@ -224,6 +235,8 @@ import ClickSpark from '@/components/ClickSpark.vue'
 import ScrollStack from '@/components/ScrollStack.vue'
 import ScrollStackItem from '@/components/ScrollStackItem.vue'
 import ElectricBorder from '@/components/ElectricBorder.vue'
+import EmojiCursor from '@/components/EmojiCursor.vue'
+import ShaderBackground from '@/components/ShaderBackground.vue'
 
 const router = useRouter()
 const recipeStore = useRecipeStore()
