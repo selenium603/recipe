@@ -4,26 +4,26 @@
     <!-- 可展开/收起的选择面板 -->
     <details class="mb-4 group" :open="panelOpen" @toggle="onDetailsToggle">
       <summary
-        class="cursor-pointer select-none px-4 py-2 border-2 border-[#0A0910] rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-between"
+        class="cursor-pointer select-none px-4 py-3 md:py-2 border-2 border-[#0A0910] rounded-lg bg-gray-100 hover:bg-gray-200 active:bg-gray-300 flex items-center justify-between"
       >
-        <span class="font-medium">食材列表</span>
+        <span class="font-medium text-base md:text-sm">▼食材列表</span>
         <div class="flex items-center gap-2">
           <button
             v-if="selectedIngredients.length > 0"
             @click.prevent="clearAllIngredients"
-            class="text-xs px-2 py-0.5 rounded bg-red-100 text-red-600 hover:bg-red-200 transition-colors font-medium border border-red-300"
+            class="text-sm md:text-xs px-3 py-1 md:px-2 md:py-0.5 rounded bg-red-100 text-red-600 hover:bg-red-200 active:bg-red-300 transition-colors font-medium border border-red-300"
             title="清空所有已选食材"
           >
             清空
           </button>
-          <span>{{ panelOpen ? '－' : '＋' }}</span>
+          <span class="text-lg md:text-base">{{ panelOpen ? '－' : '＋' }}</span>
         </div>
       </summary>
 
-      <div class="mt-3 space-y-3">
+      <div class="mt-3 space-y-4">
         <!-- 蔬菜 -->
         <div>
-          <div class="text-xs font-semibold text-gray-600 mb-1">蔬菜</div>
+          <div class="text-sm md:text-xs font-semibold text-gray-600 mb-2">蔬菜</div>
           <div class="flex flex-wrap gap-2">
             <button
               v-for="ingredient in groupedIngredients.vegetables"
@@ -38,7 +38,7 @@
 
         <!-- 肉类 -->
         <div>
-          <div class="text-xs font-semibold text-gray-600 mb-1">肉</div>
+          <div class="text-sm md:text-xs font-semibold text-gray-600 mb-2">肉</div>
           <div class="flex flex-wrap gap-2">
             <button
               v-for="ingredient in groupedIngredients.meat"
@@ -53,7 +53,7 @@
 
         <!-- 蛋奶 -->
         <div>
-          <div class="text-xs font-semibold text-gray-600 mb-1">蛋奶</div>
+          <div class="text-sm md:text-xs font-semibold text-gray-600 mb-2">蛋奶</div>
           <div class="flex flex-wrap gap-2">
             <button
               v-for="ingredient in groupedIngredients.eggsDairy"
@@ -68,7 +68,7 @@
 
         <!-- 其他/主食等 -->
         <div v-if="groupedIngredients.others.length">
-          <div class="text-xs font-semibold text-gray-600 mb-1">其他</div>
+          <div class="text-sm md:text-xs font-semibold text-gray-600 mb-2">其他</div>
           <div class="flex flex-wrap gap-2">
             <button
               v-for="ingredient in groupedIngredients.others"
@@ -90,13 +90,13 @@
           v-model="newIngredient"
           @keyup.enter="addCustomIngredient"
           placeholder="输入其他食材..."
-          class="flex-1 p-3 border-2 border-[#0A0910] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+          class="flex-1 p-3 md:p-3 border-2 border-[#0A0910] rounded-lg text-base md:text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
           :disabled="selectedIngredients.length >= 10"
         />
         <button
           @click="addCustomIngredient"
           :disabled="!newIngredient.trim() || selectedIngredients.length >= 10"
-          class="bg-yellow-400 text-dark-800 px-4 py-3 rounded-lg border-2 border-[#0A0910] hover:bg-yellow-500 disabled:bg-gray-300 disabled:cursor-not-allowed font-medium"
+          class="bg-yellow-400 text-dark-800 px-5 py-3 md:px-4 md:py-3 rounded-lg border-2 border-[#0A0910] hover:bg-yellow-500 active:bg-yellow-600 disabled:bg-gray-300 disabled:cursor-not-allowed font-medium text-base md:text-sm whitespace-nowrap"
         >
           添加
         </button>
@@ -161,10 +161,10 @@ const groupedIngredients = computed(() => {
 })
 
 const buttonClass = (ingredient: string) => [
-  'px-3 py-2 rounded-lg border-2 border-[#0A0910] font-medium text-sm transition-all duration-200',
+  'px-3 py-2.5 md:px-3 md:py-2 rounded-lg border-2 border-[#0A0910] font-medium text-base md:text-sm transition-all duration-200 active:scale-95',
   props.selectedIngredients.includes(ingredient)
-    ? 'bg-yellow-400 text-dark-800'
-    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+    ? 'bg-yellow-400 text-dark-800 shadow-md'
+    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 active:bg-gray-300'
 ]
 
 const toggleIngredient = (ingredient: string) => {

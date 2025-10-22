@@ -15,25 +15,25 @@
 
       <div class="max-w-7xl mx-auto flex-1 w-full pb-8">
         <!-- Logo 区域 -->
-        <div class="text-center mb-6">
-          <div class="w-20 h-20 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center mx-auto shadow-lg border-4 border-white">
-            <span class="text-white text-3xl">🔍</span>
+        <div class="text-center mb-4 md:mb-6">
+          <div class="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center mx-auto shadow-lg border-4 border-white">
+            <span class="text-white text-2xl sm:text-3xl">🔍</span>
           </div>
         </div>
 
         <!-- 搜索区域 -->
-        <div class="bg-white border-2 border-[#0A0910] rounded-lg p-6 mb-8">
+        <div class="bg-white border-2 border-[#0A0910] rounded-lg p-4 md:p-6 mb-6 md:mb-8">
           <div class="flex gap-2 mb-4">
             <input
               v-model="searchQuery"
               @keyup.enter="performSearch"
-              placeholder="输入菜名、食材或口味，如：麻辣、简单、下饭..."
-              class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 text-lg"
+              placeholder="输入菜名、食材或口味..."
+              class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 text-base md:text-lg"
             />
             <button
               @click="performSearch"
               :disabled="!searchQuery.trim() || isSearching"
-              class="px-8 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:bg-gray-300 transition-colors font-medium"
+              class="px-5 py-3 md:px-8 md:py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 active:bg-orange-700 disabled:bg-gray-300 transition-colors font-medium text-base md:text-base whitespace-nowrap"
             >
               {{ isSearching ? '搜索中...' : '搜索' }}
             </button>
@@ -41,13 +41,13 @@
           
           <!-- 搜索建议 -->
           <div v-if="searchSuggestions.length > 0 && !hasSearched" class="mb-4">
-            <div class="text-sm text-gray-600 mb-2">热门搜索：</div>
+            <div class="text-sm md:text-sm text-gray-600 mb-2">热门搜索：</div>
             <div class="flex flex-wrap gap-2">
               <button
                 v-for="suggestion in searchSuggestions"
                 :key="suggestion"
                 @click="selectSuggestion(suggestion)"
-                class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200 transition-colors"
+                class="px-3 py-1.5 md:px-3 md:py-1 bg-gray-100 text-gray-700 rounded-full text-base md:text-sm hover:bg-gray-200 active:bg-gray-300 transition-colors"
               >
                 {{ suggestion }}
               </button>
@@ -57,17 +57,17 @@
 
         <!-- 搜索结果 -->
         <div v-if="searchResults.length > 0" class="mb-8">
-          <div class="flex items-center justify-between mb-6">
-            <h2 class="text-2xl font-bold text-dark-800">搜索结果 ({{ searchResults.length }} 道菜)</h2>
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 md:mb-6">
+            <h2 class="text-xl md:text-2xl font-bold text-dark-800">搜索结果 ({{ searchResults.length }} 道菜)</h2>
             <button
               @click="clearSearch"
-              class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+              class="px-4 py-2.5 md:px-4 md:py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 active:bg-gray-700 transition-colors text-base md:text-sm font-medium"
             >
               清除结果
             </button>
           </div>
           
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             <div
               v-for="recipe in searchResults"
               :key="recipe.id"

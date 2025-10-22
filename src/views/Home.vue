@@ -15,11 +15,11 @@
 
     <div class="max-w-7xl mx-auto flex-1 w-full pb-8">
       <!-- Logo 区域 -->
-      <div class="text-center mb-1">
+      <div class="text-center mb-2 md:mb-1">
         <div
-          class="w-20 h-20 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center mx-auto shadow-lg border-4 border-white"
+          class="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center mx-auto shadow-lg border-4 border-white"
         >
-          <span class="text-white text-3xl">🍽️</span>
+          <span class="text-white text-2xl sm:text-3xl">🍽️</span>
         </div>
       </div>
 
@@ -33,22 +33,23 @@
       >
         <!-- 步骤1: 选择食材 -->
         <ScrollStackItem item-className="bg-gradient-to-br from-orange-100 to-orange-50">
-          <div class="bg-orange-400 text-white px-4 py-2 rounded-t-lg border-2 border-[#0A0910] border-b-0 inline-block -mx-6 -mt-6 md:-mx-12 md:-mt-12 mb-4">
-            <span class="font-bold">1. 选择食材</span>
+          <div class="bg-orange-400 text-white px-4 py-2.5 md:px-4 md:py-2 rounded-t-lg border-2 border-[#0A0910] border-b-0 inline-block -mx-4 -mt-4 sm:-mx-6 sm:-mt-6 md:-mx-12 md:-mt-12 mb-4">
+            <span class="font-bold text-base md:text-sm">1. 选择食材</span>
           </div>
           <div class="bg-white border-2 border-[#0A0910] rounded-lg p-4 md:p-6">
             <IngredientSelector v-model:selectedIngredients="selectedIngredients" />
-            <div class="px-3 py-2 bg-gray-50 border-t border-gray-200 text-xs text-gray-500 flex justify-between items-center mt-4">
-              <span>点击食材快速添加到列表</span>
-              <span class="font-medium">已选择 {{ selectedIngredients.length }}/10</span>
+            <div class="px-3 py-2 bg-gray-50 border-t border-gray-200 text-sm md:text-xs text-gray-500 flex justify-between items-center mt-4">
+              <span class="hidden sm:inline">点击食材快速添加到列表</span>
+              <span class="sm:hidden">点击添加</span>
+              <span class="font-medium text-base md:text-sm">{{ selectedIngredients.length }}/10</span>
             </div>
           </div>
         </ScrollStackItem>
 
         <!-- 步骤2: 选择菜系 -->
         <ScrollStackItem item-className="bg-gradient-to-br from-green-100 to-green-50">
-          <div class="bg-green-400 text-white px-4 py-2 rounded-t-lg border-2 border-[#0A0910] border-b-0 inline-block -mx-6 -mt-6 md:-mx-12 md:-mt-12 mb-4">
-            <span class="font-bold">2. 选择菜系</span>
+          <div class="bg-green-400 text-white px-4 py-2.5 md:px-4 md:py-2 rounded-t-lg border-2 border-[#0A0910] border-b-0 inline-block -mx-4 -mt-4 sm:-mx-6 sm:-mt-6 md:-mx-12 md:-mt-12 mb-4">
+            <span class="font-bold text-base md:text-sm">2. 选择菜系</span>
           </div>
           <div class="bg-white border-2 border-[#0A0910] rounded-lg p-4 md:p-6">
             <CuisineSelector v-model:selectedCuisines="selectedCuisines" />
@@ -57,8 +58,8 @@
 
         <!-- 步骤3: 生成推荐 -->
         <ScrollStackItem item-className="bg-gradient-to-br from-blue-100 to-blue-50">
-          <div class="bg-blue-400 text-white px-4 py-2 rounded-t-lg border-2 border-[#0A0910] border-b-0 inline-block -mx-6 -mt-6 md:-mx-12 md:-mt-12 mb-4">
-            <span class="font-bold">3. 生成推荐</span>
+          <div class="bg-blue-400 text-white px-4 py-2.5 md:px-4 md:py-2 rounded-t-lg border-2 border-[#0A0910] border-b-0 inline-block -mx-4 -mt-4 sm:-mx-6 sm:-mt-6 md:-mx-12 md:-mt-12 mb-4">
+            <span class="font-bold text-base md:text-sm">3. 生成推荐</span>
           </div>
           <div class="bg-white border-2 border-[#0A0910] rounded-lg p-4 md:p-6">
             <!-- 健康替换建议 -->
@@ -88,7 +89,7 @@
                 <button
                   @click="generateRecommendation"
                   :disabled="!canDraw"
-                  class="relative px-8 py-4 font-semibold text-white rounded-xl disabled:opacity-50 transition-all duration-200 hover:scale-105"
+                  class="relative px-8 py-4 md:px-8 md:py-4 font-semibold text-white rounded-xl disabled:opacity-50 transition-all duration-200 hover:scale-105 active:scale-95 text-lg md:text-base"
                   style="background: radial-gradient(60% 100% at 50% 0%, #1f2937 0%, #111827 60%, #0b1220 100%); box-shadow: 0 0 32px rgba(125,249,255,.25) inset, 0 0 12px rgba(125,249,255,.35);"
                 >
                   <span class="relative z-[1] flex items-center gap-2">
@@ -96,7 +97,7 @@
                       <span>抽卡中...</span>
                     </template>
                     <template v-else>
-                      <span class="text-xl">🎲</span>
+                      <span class="text-2xl md:text-xl">🎲</span>
                       <span>开始抽卡</span>
                     </template>
                   </span>
@@ -115,16 +116,16 @@
       <!-- 推荐结果展示 - 置于底部 -->
       <section v-if="drawnCards.length" class="mb-8 mt-8 animate-fade-in-up relative z-10" ref="resultsSection">
         <div
-          class="bg-orange-400 text-white px-4 py-2 rounded-t-lg border-2 border-[#0A0910] border-b-0 inline-block"
+          class="bg-orange-400 text-white px-4 py-2.5 md:px-4 md:py-2 rounded-t-lg border-2 border-[#0A0910] border-b-0 inline-block"
         >
-          <span class="font-bold">🎉 推荐结果</span>
+          <span class="font-bold text-base md:text-sm">🎉 推荐结果</span>
         </div>
         <div
           class="bg-white border-2 border-[#0A0910] rounded-lg rounded-tl-none p-4 md:p-6"
           :style="resultsMinHeight ? { minHeight: resultsMinHeight + 'px' } : undefined"
           ref="resultsContainerRef"
         >
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" ref="gridRef">
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6" ref="gridRef">
             <!-- v-memo优化：只在卡片状态改变时重渲染 -->
             <div v-for="card in drawnCards" :key="card.id" v-memo="[card.revealed, card.settled, card.showingPicker]" class="relative" :class="{ 'z-50': card.showingPicker }">
               <div v-if="!card.settled" class="card" :class="{ 'is-flipped': card.revealed }" @click="openRecipe(card.recipe)">
@@ -144,39 +145,39 @@
           </div>
 
           <div class="text-center mt-8">
-            <h3 class="text-2xl font-bold text-dark-800 mb-2">已抽到 {{ drawnCards.length }} 张</h3>
+            <h3 class="text-xl md:text-2xl font-bold text-dark-800 mb-4 md:mb-2">已抽到 {{ drawnCards.length }} 张</h3>
 
-            <div class="flex justify-center gap-4">
+            <div class="flex flex-wrap justify-center gap-3 md:gap-4 mb-4">
             <div
               v-for="item in history"
               :key="item.name + item.cuisine"
               @click="selectHistory(item)"
               :title="item.name"
-              class="cursor-pointer text-center"
+              class="cursor-pointer text-center active:scale-95 transition-transform"
             >
-                <div class="text-lg mb-1">{{ item.emoji }}</div>
-                <p class="text-sm font-medium text-dark-800 truncate">{{ item.name }}</p>
+                <div class="text-xl md:text-lg mb-1">{{ item.emoji }}</div>
+                <p class="text-sm font-medium text-dark-800 truncate max-w-[80px]">{{ item.name }}</p>
                 <p class="text-xs text-gray-600">{{ item.cuisine }}</p>
               </div>
             </div>
 
-            <div class="mt-4 flex gap-3 justify-center">
+            <div class="mt-4 flex flex-wrap gap-2 md:gap-3 justify-center">
               <button
                 v-if="history.length"
                 @click="clearHistory"
-                class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm font-medium"
+                class="px-4 py-2.5 md:px-4 md:py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 active:bg-red-700 transition-colors text-base md:text-sm font-medium"
               >
                 清除历史
               </button>
               <button
                 @click="router.push('/search')"
-                class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium"
+                class="px-4 py-2.5 md:px-4 md:py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 active:bg-orange-700 transition-colors text-base md:text-sm font-medium"
               >
                 🔍 AI智能搜索
               </button>
               <button
                 @click="router.push('/collections')"
-                class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium"
+                class="px-4 py-2.5 md:px-4 md:py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 active:bg-blue-700 transition-colors text-base md:text-sm font-medium"
               >
                 管理收藏夹 →
               </button>
