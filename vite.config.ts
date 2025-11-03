@@ -59,6 +59,18 @@ export default defineConfig({
   server: {
     hmr: {
       overlay: false  // 减少开发环境内存占用
+    },
+    // 代理配置：解决CORS跨域问题
+    proxy: {
+      '/api/boohee': {
+        target: 'https://fc.boohee.com',
+        changeOrigin: true,
+        rewrite: (path) => {
+          // 移除 /api/boohee 前缀，保留剩余路径
+          return path.replace(/^\/api\/boohee/, '')
+        },
+        secure: true
+      }
     }
   }
 })

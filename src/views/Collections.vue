@@ -14,16 +14,13 @@
       <GlobalNavigation />
 
       <div class="max-w-7xl mx-auto flex-1 w-full pb-8">
-        <!-- Logo 区域 -->
         <div class="text-center mb-6">
           <div class="w-20 h-20 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center mx-auto shadow-lg border-4 border-white">
             <span class="text-white text-3xl">📁</span>
           </div>
         </div>
 
-        <!-- 筛选栏和新建按钮 -->
         <div class="flex items-center gap-3 mb-6">
-          <!-- 筛选标签栏 -->
           <div class="bg-white border-2 border-[#0A0910] rounded-lg px-4 py-3 flex items-center gap-2 flex-1">
             <span class="text-sm text-gray-600 whitespace-nowrap">筛选标签：</span>
             <div class="flex items-center gap-2 flex-wrap">
@@ -36,7 +33,6 @@
             </div>
           </div>
           
-          <!-- 新建收藏夹按钮 -->
           <button 
             @click="showCreateInput = true" 
             class="w-12 h-12 bg-orange-500 text-white rounded-full hover:bg-orange-600 transition-all duration-200 font-bold text-2xl flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-105 flex-shrink-0"
@@ -46,7 +42,6 @@
           </button>
         </div>
 
-        <!-- 新建收藏夹弹窗 -->
         <div v-if="showCreateInput" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="cancelCreate">
           <div class="bg-white rounded-lg border-2 border-[#0A0910] p-6 w-[90%] max-w-md shadow-2xl">
             <h3 class="text-lg font-bold mb-4">新建收藏夹</h3>
@@ -64,7 +59,6 @@
           </div>
         </div>
 
-        <!-- 收藏夹列表 -->
         <draggable 
           v-model="collections" 
           @start="onDragStart" 
@@ -93,7 +87,7 @@
                 </div>
               </div>
               <div class="text-xs text-gray-500 mb-2">
-                {{ col.items.length }} 道菜
+                {{ getVisibleCount(col.items) }} / {{ col.items.length }} 道菜
                 <span v-if="activeCandidateId===col.id" class="ml-2 px-2 py-0.5 rounded bg-green-100 text-green-700">当前候选集</span>
               </div>
               <draggable 
@@ -112,6 +106,7 @@
               >
                 <template #item="{element: r}">
                   <div
+                    v-show="isItemVisible(r)"
                     :key="r.id"
                     v-memo="[r.id, r.name]"
                     class="flex items-center justify-between border rounded px-2 py-1 hover:bg-gray-50 cursor-move transition-all duration-200"
@@ -129,7 +124,6 @@
           </template>
         </draggable>
 
-        <!-- 历史快捷加入 -->
         <div class="mt-8 bg-white border-2 border-[#0A0910] rounded-lg p-6">
           <h3 class="font-semibold mb-2">从历史快速加入</h3>
           <div class="flex flex-wrap gap-2">
@@ -145,35 +139,7 @@
           </div>
         </div>
 
-        <!-- 详情弹窗 -->
-        <div v-if="modalRecipe" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="closeModal">
-          <div class="bg-white max-w-2xl w-[92vw] rounded-lg border-2 border-[#0A0910] overflow-hidden">
-            <div class="flex items-center justify-between px-4 py-3 border-b">
-              <h3 class="text-lg font-bold">{{ modalRecipe.name }} · 做法</h3>
-              <button class="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300" @click="closeModal">关闭</button>
-            </div>
-            <div class="p-4 max-h-[70vh] overflow-auto">
-              <div class="mb-3 text-sm text-gray-600">⏱️ 用时：{{ formatTime(modalRecipe.cookingTime) }} · 菜系：{{ modalRecipe.cuisine }}</div>
-              <div class="mb-4">
-                <div class="font-semibold mb-2">食材</div>
-                <div class="flex flex-wrap gap-2">
-                  <span v-for="ing in modalRecipe.ingredients" :key="ing" class="px-2 py-1 rounded bg-gray-100 text-sm border">{{ ing }}</span>
-                </div>
-              </div>
-              <div>
-                <div class="font-semibold mb-2">步骤</div>
-                <ol class="list-decimal ml-5 space-y-2">
-                  <li v-for="s in modalRecipe.steps" :key="s.step" class="text-sm leading-relaxed flex items-center justify-between">
-                    <span>{{ s.description }}</span>
-                    <button v-if="s.time" @click="startTimer(s.time, s.description)" class="ml-2 px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700">
-                      ⏱️ {{ s.time }}分钟
-                    </button>
-                  </li>
-                </ol>
-              </div>
-            </div>
-          </div>
-        </div>
+        <RecipeModal :recipe="modalRecipe" @close="closeModal" />
       </div>
 
       <GlobalFooter />
@@ -190,6 +156,7 @@ import GlobalFooter from '@/components/GlobalFooter.vue'
 import ClickSpark from '@/components/ClickSpark.vue'
 import ShaderBackground from '@/components/ShaderBackground.vue'
 import EmojiCursor from '@/components/EmojiCursor.vue'
+import RecipeModal from '@/components/RecipeModal.vue'
 import draggable from 'vuedraggable'
 
 interface Collection { id: string; name: string; items: Recipe[] }
@@ -211,9 +178,16 @@ const tagOptions = computed(() => {
   return Array.from(set)
 })
 
-function visibleItems(items: Recipe[]) {
-  if (selectedTag.value === '全部') return items
-  return items.filter(i => i.cuisine === selectedTag.value)
+// 计算每个收藏夹的可见菜品数量
+function getVisibleCount(items: Recipe[]) {
+  if (selectedTag.value === '全部') return items.length
+  return items.filter(i => i.cuisine === selectedTag.value).length
+}
+
+// 判断单个菜品是否应该显示
+function isItemVisible(item: Recipe) {
+  if (selectedTag.value === '全部') return true
+  return item.cuisine === selectedTag.value
 }
 
 function load() {
@@ -344,28 +318,6 @@ function openRecipe(recipe: Recipe) {
 
 function closeModal() {
   modalRecipe.value = null
-}
-
-function formatTime(minutes: number) {
-  if (minutes < 60) return `${minutes}分钟`
-  const hours = Math.floor(minutes / 60)
-  const mins = minutes % 60
-  return mins > 0 ? `${hours}小时${mins}分钟` : `${hours}小时`
-}
-
-function startTimer(minutes: number, description: string) {
-  const seconds = minutes * 60
-  let remaining = seconds
-  
-  const timer = setInterval(() => {
-    remaining--
-    if (remaining <= 0) {
-      clearInterval(timer)
-      alert(`⏰ 计时完成：${description}`)
-    }
-  }, 1000)
-  
-  alert(`⏱️ 开始计时 ${minutes} 分钟：${description}`)
 }
 
 onMounted(() => {

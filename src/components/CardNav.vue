@@ -44,7 +44,7 @@
           :key="`${item.label}-${idx}`"
           :ref="el => setCardRef(idx, el)"
           class="nav-card select-none relative flex items-center justify-center px-4 py-3 rounded-lg min-w-0 h-[50px] cursor-pointer transition-all duration-200 ease-out hover:opacity-90 hover:scale-[1.02]"
-          :style="{ backgroundColor: item.bgColor, color: item.textColor, flex: item.flex ? `${item.flex} 1 auto` : '1 1 auto' }"
+          :style="{ backgroundImage: item.gradient || `linear-gradient(135deg, ${item.bgColor}, ${item.bgColor})`, color: item.textColor, flex: item.flex ? `${item.flex} 1 auto` : '1 1 auto' }"
           @click="navigateTo(item.route)"
         >
           <div class="nav-card-label font-medium text-base whitespace-nowrap">
@@ -68,6 +68,7 @@ interface NavLink {
 interface NavItem {
   label: string
   bgColor: string
+  gradient?: string
   textColor: string
   route: string
   links: NavLink[]

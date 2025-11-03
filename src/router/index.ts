@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
-// 路由懒加载 - 按需加载页面组件，减少初始bundle大小
 const routes = [
   {
     path: '/',
@@ -16,6 +15,16 @@ const routes = [
     path: '/search',
     name: 'Search',
     component: () => import('@/views/Search.vue')
+  },
+  {
+    path: '/ai-assistant',
+    name: 'AIAssistant',
+    component: () => import('@/views/AIAssistant.vue')
+  },
+  {
+    path: '/nutrition',
+    name: 'Nutrition',
+    component: () => import('@/views/Nutrition.vue')
   }
 ]
 

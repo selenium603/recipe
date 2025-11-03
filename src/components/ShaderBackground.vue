@@ -1,4 +1,3 @@
-<!-- ShaderBackground.vue -->
 <template>
   <canvas ref="canvasRef" class="shader-background"></canvas>
 </template>
@@ -12,7 +11,6 @@ let program: WebGLProgram | null = null
 let animationId: number | null = null
 let startTime = Date.now()
 
-// 顶点着色器
 const vertexShaderSource = `
   attribute vec2 position;
   void main() {
@@ -20,7 +18,6 @@ const vertexShaderSource = `
   }
 `
 
-// 片元着色器 - 沸腾油锅效果
 const fragmentShaderSource = `
   precision highp float;
   
@@ -193,7 +190,6 @@ const initWebGL = () => {
   
   gl.useProgram(program)
   
-  // 创建全屏四边形
   const positions = new Float32Array([
     -1, -1,
      1, -1,
@@ -212,11 +208,9 @@ const initWebGL = () => {
   return true
 }
 
-// 性能优化：限制DPR，降低内存占用
 const resizeCanvas = () => {
   if (!canvasRef.value) return
   
-  // 限制DPR最大为2，避免高分辨率设备内存占用过高
   const dpr = Math.min(window.devicePixelRatio || 1, 2)
   const width = window.innerWidth
   const height = window.innerHeight
@@ -236,14 +230,12 @@ const render = () => {
   
   const currentTime = (Date.now() - startTime) / 1000
   
-  // 设置 uniform
   const resolutionLocation = gl.getUniformLocation(program, 'resolution')
   const timeLocation = gl.getUniformLocation(program, 'time')
   
   gl.uniform2f(resolutionLocation, canvasRef.value.width, canvasRef.value.height)
   gl.uniform1f(timeLocation, currentTime)
   
-  // 绘制
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
   
   animationId = requestAnimationFrame(render)
@@ -254,7 +246,6 @@ onMounted(() => {
     resizeCanvas()
     render()
     
-    // 防抖处理resize事件，避免频繁重渲染
     let resizeTimer: number
     const debouncedResize = () => {
       clearTimeout(resizeTimer)

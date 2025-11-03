@@ -1,12 +1,39 @@
-// stores/useRecipeStore.ts
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import type { Recipe } from '@/types'
 import recipesData from '@/data/recipes.json'
+import { SimpleLRUArray, LRUCache } from '@/utils/lruCache'
+
+interface UserProfile {
+  cuisinePreferences: Record<string, number>
+  flavorPreferences: Record<string, number>
+  difficultyPreferences: Record<string, number>
+  cookingTimePreferences: Record<string, number>
+  ingredientPreferences: Record<string, number>
+  clickedRecipes: string[]
+  searchKeywords: string[]
+  timeScenarios: Record<string, string[]>
+  lastUpdated: number
+}
 
 export const useRecipeStore = defineStore('recipes', () => {
   const recipes = ref<Recipe[]>(recipesData)
   const favorites = ref<Recipe[]>([])
+  
+  const searchKeywordsCache = new SimpleLRUArray<string>(30)
+  const clickedRecipesCache = new SimpleLRUArray<string>(100)
+  
+  const userProfile = ref<UserProfile>({
+    cuisinePreferences: {},
+    flavorPreferences: {},
+    difficultyPreferences: {},
+    cookingTimePreferences: {},
+    ingredientPreferences: {},
+    clickedRecipes: [],
+    searchKeywords: [],
+    timeScenarios: { '早餐': [], '午餐': [], '晚餐': [], '宵夜': [] },
+    lastUpdated: Date.now()
+  })
 
   const addToFavorites = (recipe: Recipe) => {
     if (!favorites.value.some(fav => fav.id === recipe.id)) {
@@ -20,7 +47,6 @@ export const useRecipeStore = defineStore('recipes', () => {
     localStorage.setItem('favoriteRecipes', JSON.stringify(favorites.value))
   }
 
-  // 初始化时从localStorage恢复收藏
   const loadFavorites = () => {
     const saved = localStorage.getItem('favoriteRecipes')
     if (saved) {
@@ -32,10 +58,8 @@ export const useRecipeStore = defineStore('recipes', () => {
     }
   }
 
-  // AI搜索功能
   const searchRecipes = async (query: string): Promise<Recipe[]> => {
     try {
-      // 获取API配置
       const apiUrl = import.meta.env.VITE_AI_API_URL
       const apiKey = import.meta.env.VITE_AI_API_KEY
       const aiModel = import.meta.env.VITE_AI_MODEL || 'openai/gpt-3.5-turbo'
@@ -48,10 +72,7 @@ export const useRecipeStore = defineStore('recipes', () => {
       
       console.log('🤖 AI搜索配置:')
       console.log('  - API URL:', apiUrl)
-      console.log('  - 模型:', aiModel)
-      console.log('  - 查询:', query)
 
-      // AI生成菜谱模式
       const searchData = {
         model: aiModel,
         messages: [
@@ -101,7 +122,6 @@ export const useRecipeStore = defineStore('recipes', () => {
         temperature: 0.8
       }
 
-      // 调用AI API
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), timeout)
 
@@ -131,13 +151,11 @@ export const useRecipeStore = defineStore('recipes', () => {
       const data = await response.json()
       console.log('📦 AI返回数据:', data)
       
-      // 处理OpenRouter Chat Completions API的响应
       if (data.choices && data.choices[0] && data.choices[0].message) {
         const aiResponse = data.choices[0].message.content
         console.log('🤖 AI回复内容:', aiResponse)
         
         try {
-          // 清理可能的markdown代码块标记
           let cleanedResponse = aiResponse.trim()
           if (cleanedResponse.startsWith('```json')) {
             cleanedResponse = cleanedResponse.replace(/^```json\s*/, '').replace(/\s*```$/, '')
@@ -145,14 +163,11 @@ export const useRecipeStore = defineStore('recipes', () => {
             cleanedResponse = cleanedResponse.replace(/^```\s*/, '').replace(/\s*```$/, '')
           }
           
-          // 解析AI生成的菜谱
           const aiRecipes = JSON.parse(cleanedResponse)
           console.log('✅ 成功解析AI返回的菜谱:', aiRecipes)
           
           if (Array.isArray(aiRecipes)) {
-            // 将AI生成的菜谱转换为Recipe对象
             return aiRecipes.map((recipe: any, index: number) => {
-              // 确保steps格式正确
               const steps = Array.isArray(recipe.steps) && recipe.steps.length > 0
                 ? recipe.steps.map((s: any, i: number) => ({
                     step: s.step || i + 1,
@@ -197,24 +212,20 @@ export const useRecipeStore = defineStore('recipes', () => {
       if (error instanceof Error) {
         console.error('错误详情:', error.message)
       }
-      // 降级到本地搜索
       console.log('🔄 降级到本地搜索...')
       return localSearch(query)
     }
   }
 
-  // 本地搜索降级方案
   const localSearch = (query: string): Recipe[] => {
     let keywords = query.toLowerCase().trim().split(/\s+/)
     
-    // 处理带"类"、"菜"等后缀的搜索词
     keywords = keywords.map(keyword => {
-      // 如果以"类"、"菜"等结尾，去掉后缀作为额外关键词
       if (keyword.endsWith('类') && keyword.length > 1) {
-        return keyword.slice(0, -1) // 去掉"类"字
+        return keyword.slice(0, -1)
       }
       if (keyword.endsWith('菜') && keyword.length > 2) {
-        return keyword.slice(0, -1) // 去掉"菜"字
+        return keyword.slice(0, -1)
       }
       return keyword
     })
@@ -224,18 +235,15 @@ export const useRecipeStore = defineStore('recipes', () => {
         let score = 0
         
         keywords.forEach(keyword => {
-          // 对于单字关键词，只匹配菜名和菜系（更严格）
           if (keyword.length === 1) {
             if (recipe.name.toLowerCase().includes(keyword)) score += 15
             if (recipe.cuisine.toLowerCase().includes(keyword)) score += 10
           } else {
-            // 多字关键词，正常匹配各个字段
             if (recipe.name.toLowerCase() === keyword) score += 25
             if (recipe.name.toLowerCase().includes(keyword)) score += 15
             if (recipe.cuisine.toLowerCase().includes(keyword)) score += 10
             if (recipe.flavor.toLowerCase().includes(keyword)) score += 8
             if (recipe.ingredients.some(ing => ing.toLowerCase().includes(keyword))) score += 6
-            // 降低描述的权重，避免匹配到步骤中的"汤汁"等
             if (recipe.description.toLowerCase().includes(keyword)) score += 2
             if (recipe.difficulty.toLowerCase().includes(keyword)) score += 5
           }
@@ -245,7 +253,6 @@ export const useRecipeStore = defineStore('recipes', () => {
       })
       .filter(recipe => recipe.matchScore > 0)
       .sort((a, b) => {
-        // 先按分数排序，分数相同按烹饪时间排序（简单的优先）
         if (b.matchScore !== a.matchScore) {
           return b.matchScore - a.matchScore
         }
@@ -254,12 +261,468 @@ export const useRecipeStore = defineStore('recipes', () => {
       .slice(0, 12)
   }
 
+  const trackRecipeClick = (recipe: Recipe) => {
+    clickedRecipesCache.add(recipe.id)
+    userProfile.value.clickedRecipes = clickedRecipesCache.getAll()
+    
+    userProfile.value.cuisinePreferences[recipe.cuisine] = 
+      (userProfile.value.cuisinePreferences[recipe.cuisine] || 0) + 1
+    
+    userProfile.value.flavorPreferences[recipe.flavor] = 
+      (userProfile.value.flavorPreferences[recipe.flavor] || 0) + 1
+    
+    userProfile.value.difficultyPreferences[recipe.difficulty] = 
+      (userProfile.value.difficultyPreferences[recipe.difficulty] || 0) + 1
+    
+    const timeRange = getTimeRange(recipe.cookingTime)
+    userProfile.value.cookingTimePreferences[timeRange] = 
+      (userProfile.value.cookingTimePreferences[timeRange] || 0) + 1
+    
+    recipe.ingredients.forEach(ing => {
+      const currentPref = userProfile.value.ingredientPreferences[ing] || 0
+      userProfile.value.ingredientPreferences[ing] = Math.min(currentPref + 1, 50)
+    })
+    
+    const timeOfDay = getCurrentTimeScenario()
+    if (!userProfile.value.timeScenarios[timeOfDay]) {
+      userProfile.value.timeScenarios[timeOfDay] = []
+    }
+    const scenarios = userProfile.value.timeScenarios[timeOfDay] || []
+    const index = scenarios.indexOf(recipe.name)
+    if (index > -1) {
+      scenarios.splice(index, 1)
+    }
+    scenarios.push(recipe.name)
+    if (scenarios.length > 10) {
+      scenarios.shift()
+    }
+    userProfile.value.timeScenarios[timeOfDay] = scenarios
+    
+    userProfile.value.lastUpdated = Date.now()
+    saveUserProfile()
+  }
+  
+  const trackSearchKeyword = (keyword: string) => {
+    if (keyword.trim()) {
+      searchKeywordsCache.add(keyword.trim())
+      userProfile.value.searchKeywords = searchKeywordsCache.getAll()
+      userProfile.value.lastUpdated = Date.now()
+      saveUserProfile()
+    }
+  }
+  
+  const getTimeRange = (minutes: number): string => {
+    if (minutes <= 15) return '15分钟内'
+    if (minutes <= 30) return '15-30分钟'
+    if (minutes <= 60) return '30-60分钟'
+    return '60分钟以上'
+  }
+  
+  const getCurrentTimeScenario = (): string => {
+    const hour = new Date().getHours()
+    if (hour >= 6 && hour < 10) return '早餐'
+    if (hour >= 10 && hour < 14) return '午餐'
+    if (hour >= 14 && hour < 18) return '下午茶'
+    if (hour >= 18 && hour < 22) return '晚餐'
+    return '宵夜'
+  }
+  
+  const saveUserProfile = () => {
+    try {
+      localStorage.setItem('userProfile', JSON.stringify(userProfile.value))
+    } catch (e) {
+      console.warn('Failed to save user profile:', e)
+    }
+  }
+  
+  const loadUserProfile = () => {
+    const saved = localStorage.getItem('userProfile')
+    if (saved) {
+      try {
+        userProfile.value = JSON.parse(saved)
+        
+        if (userProfile.value.searchKeywords?.length > 0) {
+          userProfile.value.searchKeywords.forEach(keyword => {
+            searchKeywordsCache.add(keyword)
+          })
+        }
+        
+        if (userProfile.value.clickedRecipes?.length > 0) {
+          userProfile.value.clickedRecipes.forEach(recipeId => {
+            clickedRecipesCache.add(recipeId)
+          })
+        }
+        
+        console.log('✅ 用户画像已加载，LRU缓存已同步')
+      } catch (e) {
+        console.error('Failed to load user profile:', e)
+      }
+    }
+  }
+  
+  const getUserProfileSummary = computed(() => {
+    const profile = userProfile.value
+    
+    const topCuisines = Object.entries(profile.cuisinePreferences)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([cuisine, count]) => `${cuisine}(${count}次)`)
+    
+    const topFlavors = Object.entries(profile.flavorPreferences)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([flavor, count]) => `${flavor}(${count}次)`)
+    
+    const topIngredients = Object.entries(profile.ingredientPreferences)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([ing]) => ing)
+    
+    const topTimeRange = Object.entries(profile.cookingTimePreferences)
+      .sort((a, b) => b[1] - a[1])[0]?.[0] || '未知'
+    
+    const topDifficulty = Object.entries(profile.difficultyPreferences)
+      .sort((a, b) => b[1] - a[1])[0]?.[0] || '未知'
+    
+    return {
+      topCuisines: topCuisines.join('、') || '暂无偏好',
+      topFlavors: topFlavors.join('、') || '暂无偏好',
+      topIngredients: topIngredients.join('、') || '暂无偏好',
+      topTimeRange,
+      topDifficulty,
+      totalClicks: profile.clickedRecipes.length,
+      recentSearches: profile.searchKeywords.slice(-5).reverse()
+    }
+  })
+  
+  const preFilterRecipes = (query: string, maxResults: number = 10): Recipe[] => {
+    const keywords = query.toLowerCase().trim().split(/\s+/)
+    
+    const scoredRecipes = recipes.value
+      .map(recipe => {
+        let score = 0
+        
+        keywords.forEach(keyword => {
+          if (recipe.name.toLowerCase().includes(keyword)) score += 20
+          if (recipe.cuisine.toLowerCase().includes(keyword)) score += 15
+          if (recipe.flavor.toLowerCase().includes(keyword)) score += 15
+          if (recipe.difficulty.toLowerCase().includes(keyword)) score += 10
+          if (recipe.ingredients.some(ing => ing.toLowerCase().includes(keyword))) score += 12
+          if (recipe.description.toLowerCase().includes(keyword)) score += 5
+          
+          const cuisinePref = userProfile.value.cuisinePreferences[recipe.cuisine]
+          if (cuisinePref) {
+            score += cuisinePref * 0.5
+          }
+          const flavorPref = userProfile.value.flavorPreferences[recipe.flavor]
+          if (flavorPref) {
+            score += flavorPref * 0.5
+          }
+        })
+        
+        if (score > 0) {
+          const randomFactor = Math.random() * 5
+          score += randomFactor
+        }
+        
+        return { recipe, score }
+      })
+      .filter(item => item.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, maxResults)
+    
+    return scoredRecipes.map(item => item.recipe)
+  }
+  
+  const getAIRecommendations = async (userQuery: string = ''): Promise<Recipe[]> => {
+    try {
+      const apiUrl = import.meta.env.VITE_AI_API_URL
+      const apiKey = import.meta.env.VITE_AI_API_KEY
+      const aiModel = import.meta.env.VITE_AI_MODEL || 'openai/gpt-3.5-turbo'
+      
+      if (!apiUrl || !apiKey) {
+        console.warn('AI API配置不完整，使用本地推荐')
+        return getLocalRecommendations(userQuery)
+      }
+      
+      let candidates: Recipe[] = []
+      if (userQuery) {
+        candidates = preFilterRecipes(userQuery, 8)
+      } else {
+        candidates = getPersonalizedCandidates(8)
+      }
+      
+      if (candidates.length === 0) {
+        candidates = recipes.value.slice(0, 8)
+      }
+      
+      const candidateSummaries = candidates.map(r => ({
+        id: r.id,
+        name: r.name,
+        cuisine: r.cuisine,
+        flavor: r.flavor,
+        cookingTime: r.cookingTime,
+        difficulty: r.difficulty,
+        ingredients: r.ingredients.slice(0, 5),
+        description: r.description
+      }))
+      
+      const profileSummary = getUserProfileSummary.value
+      const timeScenario = getCurrentTimeScenario()
+      const randomSeed = Date.now()
+      
+      const systemPrompt = `你是一个专业的私人厨师助手。根据用户画像和候选菜谱，推荐3道最合适的菜品。
+
+用户画像：
+- 偏好菜系：${profileSummary.topCuisines}
+- 偏好口味：${profileSummary.topFlavors}
+- 常用食材：${profileSummary.topIngredients}
+- 烹饪时间偏好：${profileSummary.topTimeRange}
+- 难度偏好：${profileSummary.topDifficulty}
+- 当前时段：${timeScenario}
+- 总点击量：${profileSummary.totalClicks}次
+
+候选菜谱：
+${JSON.stringify(candidateSummaries, null, 2)}
+
+重要说明：
+1. 请从候选菜谱中选择3道最合适的推荐给用户
+2. 保持推荐的多样性，不要总是推荐相同的菜品
+3. 可以在用户偏好的基础上，适当推荐一些新口味，帮助用户探索
+4. 考虑菜系、口味、难度的搭配平衡
+5. 随机种子：${randomSeed}（用于增加推荐多样性）
+
+返回JSON格式：
+{
+  "recommendations": [
+    {
+      "id": "菜谱ID",
+      "name": "菜名",
+      "reason": "推荐理由（50字以内，说明为什么适合用户）"
+    }
+  ]
+}
+
+只返回JSON，不要其他内容。`
+      
+      const userPrompt = userQuery || `请根据我的口味偏好和当前时段（${timeScenario}），推荐3道适合的菜品。`
+      
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: aiModel,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt }
+          ],
+          temperature: 0.9,
+          max_tokens: 1000
+        })
+      })
+      
+      if (!response.ok) {
+        throw new Error(`API请求失败: ${response.status}`)
+      }
+      
+      const data = await response.json()
+      const aiResponse = data.choices?.[0]?.message?.content
+      
+      if (!aiResponse) {
+        throw new Error('AI返回格式错误')
+      }
+      
+      let cleanedResponse = aiResponse.trim()
+      if (cleanedResponse.startsWith('```json')) {
+        cleanedResponse = cleanedResponse.replace(/^```json\s*/, '').replace(/\s*```$/, '')
+      } else if (cleanedResponse.startsWith('```')) {
+        cleanedResponse = cleanedResponse.replace(/^```\s*/, '').replace(/\s*```$/, '')
+      }
+      
+      const result = JSON.parse(cleanedResponse)
+      
+      const recommendedRecipes = result.recommendations
+        .map((rec: any) => {
+          const recipe = recipes.value.find(r => r.id === rec.id)
+          if (recipe) {
+            return {
+              ...recipe,
+              aiReason: rec.reason
+            }
+          }
+          return null
+        })
+        .filter(Boolean) as Recipe[]
+      
+      return recommendedRecipes.slice(0, 3)
+      
+    } catch (error) {
+      console.error('AI推荐失败:', error)
+      return getLocalRecommendations(userQuery)
+    }
+  }
+  
+  const getLocalRecommendations = (query: string = ''): Recipe[] => {
+    if (query) {
+      return preFilterRecipes(query, 3)
+    }
+    return getPersonalizedCandidates(3)
+  }
+  
+  const getPersonalizedCandidates = (count: number): Recipe[] => {
+    const profile = userProfile.value
+    const timeScenario = getCurrentTimeScenario()
+    
+    const scoredRecipes = recipes.value
+      .map(recipe => {
+        let score = 0
+        
+        score += (profile.cuisinePreferences[recipe.cuisine] || 0) * 3
+        score += (profile.flavorPreferences[recipe.flavor] || 0) * 2
+        score += (profile.difficultyPreferences[recipe.difficulty] || 0) * 1
+        
+        recipe.ingredients.forEach(ing => {
+          score += (profile.ingredientPreferences[ing] || 0) * 0.5
+        })
+        
+        if (profile.timeScenarios[timeScenario]?.includes(recipe.name)) {
+          score += 10
+        }
+        
+        if (profile.clickedRecipes.slice(-5).includes(recipe.id)) {
+          score -= 5
+        }
+        
+        const randomFactor = Math.random() * 0.3 * score
+        score += randomFactor
+        
+        return { recipe, score }
+      })
+      .sort((a, b) => b.score - a.score)
+    
+    if (profile.clickedRecipes.length === 0) {
+      const shuffled = [...recipes.value].sort(() => Math.random() - 0.5)
+      return shuffled.slice(0, count)
+    }
+    
+    const topCandidates = scoredRecipes.slice(0, Math.min(20, scoredRecipes.length))
+    const shuffled = [...topCandidates].sort(() => Math.random() - 0.5)
+    return shuffled.slice(0, count).map(item => item.recipe)
+  }
+
+  const getAIChatResponseStream = async (
+    userQuery: string, 
+    onChunk: (text: string) => void
+  ): Promise<void> => {
+    try {
+      const apiUrl = import.meta.env.VITE_AI_API_URL
+      const apiKey = import.meta.env.VITE_AI_API_KEY
+      const aiModel = import.meta.env.VITE_AI_MODEL || 'openai/gpt-3.5-turbo'
+      
+      if (!apiUrl || !apiKey) {
+        onChunk('抱歉，AI服务暂时不可用。')
+        return
+      }
+
+      const profileSummary = getUserProfileSummary.value
+      
+      const systemPrompt = `你是一个专业的厨师助手和营养顾问。
+
+用户画像：
+- 已浏览 ${profileSummary.totalClicks} 道菜品
+- 偏好菜系：${profileSummary.topCuisines}
+- 偏好口味：${profileSummary.topFlavors}
+
+请用简洁、友好的语气回答用户问题。`
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: aiModel,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userQuery }
+          ],
+          temperature: 0.7,
+          max_tokens: 300,
+          stream: true
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('AI请求失败')
+      }
+
+      const reader = response.body?.getReader()
+      const decoder = new TextDecoder('utf-8')
+      
+      if (!reader) {
+        throw new Error('无法读取响应流')
+      }
+
+      let buffer = ''
+      
+      while (true) {
+        const { done, value } = await reader.read()
+        
+        if (done) break
+        
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        buffer = lines.pop() || ''
+        
+        for (const line of lines) {
+          const trimmedLine = line.trim()
+          
+          if (trimmedLine === '' || trimmedLine === 'data: [DONE]') {
+            continue
+          }
+          
+          if (trimmedLine.startsWith('data: ')) {
+            try {
+              const jsonStr = trimmedLine.slice(6)
+              const data = JSON.parse(jsonStr)
+              const content = data.choices[0]?.delta?.content
+              
+              if (content) {
+                onChunk(content)
+              }
+            } catch (e) {
+              console.warn('解析SSE数据失败:', e)
+            }
+          }
+        }
+      }
+      
+    } catch (error) {
+      console.error('AI对话失败:', error)
+      onChunk('抱歉，出现了一些问题。请稍后再试。')
+    }
+  }
+
   return {
     recipes,
     favorites,
     addToFavorites,
     removeFromFavorites,
     loadFavorites,
-    searchRecipes
+    searchRecipes,
+    userProfile,
+    trackRecipeClick,
+    trackSearchKeyword,
+    getUserProfileSummary,
+    saveUserProfile,
+    loadUserProfile,
+    preFilterRecipes,
+    getAIRecommendations,
+    getAIChatResponseStream,
+    getCurrentTimeScenario
   }
 })

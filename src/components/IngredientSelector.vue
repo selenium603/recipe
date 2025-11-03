@@ -1,7 +1,5 @@
-<!-- IngredientSelector.vue -->
 <template>
   <div>
-    <!-- 可展开/收起的选择面板 -->
     <details class="mb-4 group" :open="panelOpen" @toggle="onDetailsToggle">
       <summary
         class="cursor-pointer select-none px-4 py-3 md:py-2 border-2 border-[#0A0910] rounded-lg bg-gray-100 hover:bg-gray-200 active:bg-gray-300 flex items-center justify-between"
@@ -21,7 +19,6 @@
       </summary>
 
       <div class="mt-3 space-y-4">
-        <!-- 蔬菜 -->
         <div>
           <div class="text-sm md:text-xs font-semibold text-gray-600 mb-2">蔬菜</div>
           <div class="flex flex-wrap gap-2">
@@ -36,7 +33,6 @@
           </div>
         </div>
 
-        <!-- 肉类 -->
         <div>
           <div class="text-sm md:text-xs font-semibold text-gray-600 mb-2">肉</div>
           <div class="flex flex-wrap gap-2">
@@ -51,7 +47,6 @@
           </div>
         </div>
 
-        <!-- 蛋奶 -->
         <div>
           <div class="text-sm md:text-xs font-semibold text-gray-600 mb-2">蛋奶</div>
           <div class="flex flex-wrap gap-2">
@@ -66,7 +61,6 @@
           </div>
         </div>
 
-        <!-- 其他/主食等 -->
         <div v-if="groupedIngredients.others.length">
           <div class="text-sm md:text-xs font-semibold text-gray-600 mb-2">其他</div>
           <div class="flex flex-wrap gap-2">
@@ -83,7 +77,6 @@
       </div>
     </details>
 
-    <!-- 自定义食材输入 -->
     <div>
       <div class="flex gap-2 mb-2">
         <input
@@ -118,7 +111,6 @@ const emit = defineEmits(['update:selectedIngredients'])
 const newIngredient = ref('')
 const panelOpen = ref(false)
 
-// 基础清单：包含用户要求新增的食材（去重）
 const baseIngredients = Array.from(new Set([
   '包菜','午餐肉','土豆','方便面','木耳','洋葱','牛肉', '猪肉',
   '番茄','白菜','白萝卜','米','胡萝卜','腊肠','花菜','芹菜',
@@ -126,7 +118,6 @@ const baseIngredients = Array.from(new Set([
   '香肠','鸡肉','鸡蛋','鸭蛋','鹅蛋','黄瓜'
 ]))
 
-// 分类规则：蔬菜 / 肉 / 蛋奶（将鸡蛋、牛奶等放在蛋奶）
 const vegetablesSet = new Set([
   '包菜','土豆','木耳','洋葱','番茄','白菜','白萝卜','胡萝卜','花菜','芹菜',
   '茄子','莴笋','菌菇','西葫芦','青椒','黄瓜'
@@ -152,7 +143,6 @@ const groupedIngredients = computed(() => {
     } else if (eggsDairySet.has(item)) {
       eggsDairy.push(item)
     } else {
-      // 例如主食：米、米饭、面包、面食、方便面、豆腐等
       others.push(item)
     }
   })

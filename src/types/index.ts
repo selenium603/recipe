@@ -1,4 +1,3 @@
-// types/index.ts
 export interface Recipe {
   id: string
   name: string
@@ -12,6 +11,7 @@ export interface Recipe {
   steps: RecipeStep[]
   tips?: string[]
   comment: string
+  aiReason?: string
 }
 
 export interface RecipeStep {

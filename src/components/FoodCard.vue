@@ -1,7 +1,5 @@
-<!-- FoodCard.vue -->
 <template>
-  <div class="food-card bg-white rounded-lg border-2 border-[#0A0910] overflow-visible shadow-lg relative">
-    <!-- 卡片头部 -->
+  <div class="food-card bg-white rounded-lg border-2 border-[#0A0910] overflow-visible shadow-lg relative" style="z-index: 10;">
     <div class="bg-gradient-to-r from-orange-400 to-red-500 text-white p-4">
       <div class="flex items-center justify-between">
         <div>
@@ -15,9 +13,7 @@
       </div>
     </div>
 
-    <!-- 卡片内容 -->
     <div class="p-4">
-      <!-- 食材预览 -->
       <div class="mb-3">
         <h4 class="text-sm font-bold text-dark-800 mb-2 flex items-center gap-1">
           <span>🥬</span>
@@ -37,7 +33,6 @@
         </div>
       </div>
 
-      <!-- 难度和口味 -->
       <div class="grid grid-cols-2 gap-3 mb-3">
         <div class="bg-gray-50 rounded p-2 text-center">
           <div class="text-xs text-gray-600 mb-1">难度</div>
@@ -49,15 +44,24 @@
         </div>
       </div>
 
-      <!-- 描述 -->
       <p class="text-sm text-gray-700 line-clamp-2">
         {{ recipe.description }}
       </p>
-      <div class="mt-3 relative">
-        <button class="px-3 py-1 text-sm rounded border hover:bg-gray-50" @click.stop="togglePicker">
+      <div class="mt-3 relative picker-wrapper">
+        <button 
+          ref="pickerButton"
+          class="px-3 py-1 text-sm rounded border hover:bg-gray-50" 
+          @click.stop="togglePicker"
+        >
           加入收藏夹
         </button>
-        <div v-if="pickerOpen" class="absolute z-50 mt-1 w-64 bg-white border-2 border-[#0A0910] rounded-lg shadow-xl p-2 left-0">
+        
+        <div 
+          v-if="pickerOpen"
+          ref="pickerDropdown" 
+          class="absolute mt-1 w-64 bg-white border-2 border-[#0A0910] rounded-lg shadow-2xl p-2 left-0 picker-dropdown"
+          @click.stop
+        >
           <div class="text-xs text-gray-500 px-1 mb-1">选择收藏夹</div>
           <button
             v-for="c in collections"
@@ -70,7 +74,7 @@
           </button>
           <div class="border-t my-2"></div>
           <div class="flex gap-1 px-1">
-            <input v-model="newName" placeholder="新建收藏夹" class="flex-1 px-2 py-1 border rounded text-sm" @keyup.enter="createAndAdd" />
+            <input v-model="newName" placeholder="新建收藏夹" class="flex-1 px-2 py-1 border rounded text-sm" @keyup.enter="createAndAdd" @click.stop />
             <button class="px-2 text-sm bg-blue-600 text-white rounded" @click.stop="createAndAdd">新建</button>
           </div>
         </div>
@@ -90,7 +94,6 @@ const props = defineProps<{
 const emit = defineEmits(['show-picker', 'hide-picker'])
 
 const difficultyText = computed(() => {
-  // 直接使用 recipe 中定义的 difficulty 字段
   return props.recipe.difficulty
 })
 
@@ -101,8 +104,9 @@ const formatTime = (minutes: number) => {
   return mins > 0 ? `${hours}小时${mins}分钟` : `${hours}小时`
 }
 
-// 收藏夹选择器（本地持久化）
 type Collection = { id: string; name: string; items: Recipe[] }
+const pickerButton = ref<HTMLButtonElement | null>(null)
+const pickerDropdown = ref<HTMLDivElement | null>(null)
 const pickerOpen = ref(false)
 const collections = ref<Collection[]>([])
 const newName = ref('')
@@ -130,8 +134,13 @@ function togglePicker() {
 }
 
 function closeOnOutside(e: MouseEvent) {
+  if (!pickerOpen.value) return
+  
   const target = e.target as HTMLElement
-  if (!target.closest('.food-card')) {
+  const clickedInButton = pickerButton.value?.contains(target)
+  const clickedInDropdown = pickerDropdown.value?.contains(target)
+  
+  if (!clickedInButton && !clickedInDropdown) {
     pickerOpen.value = false
     emit('hide-picker', props.recipe.id)
   }
@@ -167,12 +176,21 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .food-card {
-  transition: all 0.3s ease;
+  transition: box-shadow 0.3s ease;
 }
 
 .food-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+}
+
+.picker-wrapper {
+  z-index: 200;
+  position: relative;
+}
+
+.picker-dropdown {
+  z-index: 200;
+  position: absolute;
 }
 
 .line-clamp-1 {

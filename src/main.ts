@@ -5,9 +5,11 @@ import { createPinia } from 'pinia'
 import './assets/main.css'
 import 'lenis/dist/lenis.css'
 import recipes from '@/data/recipes.json'
+import { useRecipeStore } from '@/stores/useRecipeStore'
 
+const pinia = createPinia()
 const app = createApp(App)
-app.use(createPinia())
+app.use(pinia)
 app.use(router)
 app.mount('#app')
 
@@ -15,3 +17,8 @@ app.mount('#app')
 try {
   localStorage.setItem('allRecipes', JSON.stringify(recipes))
 } catch {}
+
+// 初始化用户画像和收藏
+const store = useRecipeStore()
+store.loadUserProfile()
+store.loadFavorites()
