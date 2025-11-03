@@ -79,16 +79,10 @@ npm install
 ```bash
 npm run dev
 ```
-访问 http://localhost:5173
 
 ### 生产构建
 ```bash
 npm run build
-```
-
-### 类型检查
-```bash
-npm run type-check
 ```
 
 ## ⚙️ 环境配置
@@ -294,23 +288,3 @@ npm run preview
 - [ ] 性能监控：收集RUM数据
 - [ ] 单元测试：E2E测试覆盖
 - [ ] CDN加速：静态资源分发
-
-## 🤝 贡献
-
-欢迎提交Issue和Pull Request！
-
-## 📄 许可证
-
-MIT License
-
-## 🙏 致谢
-
-- [Vue.js](https://vuejs.org/) - 渐进式JavaScript框架
-- [Vite](https://vitejs.dev/) - 下一代前端构建工具
-- [Tailwind CSS](https://tailwindcss.com/) - 实用优先的CSS框架
-- [GSAP](https://greensock.com/gsap/) - 专业级动画库
-- [OpenRouter](https://openrouter.ai/) - AI API平台
-
----
-
-Made with ❤️ by Vue3 + TypeScript
